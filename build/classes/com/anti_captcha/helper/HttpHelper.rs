@@ -1,0 +1,8 @@
+com.anti_captcha.Helper.HttpHelper$InputOutput
+HttpHelper$HttpsClientBuilderGiver$HttpsTrustManager
+HttpHelper$InputOutput
+com.anti_captcha.Helper.HttpHelper$HttpsClientBuilderGiver
+com.anti_captcha.Helper.HttpHelper
+com.anti_captcha.Helper.HttpHelper$HttpsClientBuilderGiver$HttpsTrustManager
+HttpHelper
+HttpHelper$HttpsClientBuilderGiver
