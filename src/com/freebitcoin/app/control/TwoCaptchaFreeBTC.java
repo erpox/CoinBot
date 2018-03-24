@@ -21,19 +21,19 @@ public class TwoCaptchaFreeBTC {
     private static String proxy;
     private static String puerto;
     private Properties prop = new Properties();
-     private final String PROP_PATH = "C:\\Users\\"+ System.getProperty("user.name")
-                +"\\AppData\\Roaming\\GT Tools\\config.properties";
-    
+    private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
+            + "\\AppData\\Roaming\\GT Tools\\config.properties";
+
     public TwoCaptchaFreeBTC(String proxy, String puerto) throws FileNotFoundException {
-         
+
         TwoCaptchaFreeBTC.googleKey = "6Lc6zQQTAAAAAD8TgxgC59CXtm1G56QLu8G7Q53K";
         TwoCaptchaFreeBTC.pageUrl = "https://freebitco.in/";
-        TwoCaptchaFreeBTC.proxy = proxy;
-        TwoCaptchaFreeBTC.puerto = puerto;
+        TwoCaptchaFreeBTC.proxy = proxy.trim();
+        TwoCaptchaFreeBTC.puerto = puerto.trim();
         try {
-         
+
             prop.load(new FileReader(PROP_PATH));
-            TwoCaptchaFreeBTC.apiKey=prop.getProperty("TwoCaptchaKey");
+            TwoCaptchaFreeBTC.apiKey = prop.getProperty("TwoCaptchaKey");
             TwoCaptchaFreeBTC.proxyUser = prop.getProperty("proxyUser");
             TwoCaptchaFreeBTC.proxyPass = prop.getProperty("proxyPass");
 
@@ -49,13 +49,13 @@ public class TwoCaptchaFreeBTC {
             System.out.println("usando proxy sin auth");
         } else if (proxy.contains("0,0,0,0")) {
             System.out.println("sin proxy");
-            service= new TwoCaptchaService(apiKey, googleKey, pageUrl);      
-        }else {
+            service = new TwoCaptchaService(apiKey, googleKey, pageUrl);
+        } else {
             System.out.println("usnado proxy con auth");
-            service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto,proxyUser,proxyPass, ProxyType.HTTP);
+            service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, proxyUser, proxyPass, ProxyType.HTTP);
         }
-        
-        System.out.println("usando: " + proxy + ":" + puerto+" usuario: "+proxyUser+" clave: "+proxyPass);
+
+        System.out.println("usando: " + proxy + ":" + puerto + " usuario: " + proxyUser + " clave: " + proxyPass);
         try {
             responseToken = service.solveCaptcha();
             System.out.println("The response token is: " + responseToken);
@@ -75,4 +75,6 @@ public class TwoCaptchaFreeBTC {
             return responseToken;
         }
     }
+
 }
+

@@ -21,6 +21,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
@@ -37,6 +40,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
+import static org.openqa.selenium.io.FileHandler.delete;
 
 public class MainFrame extends javax.swing.JFrame {
 
@@ -47,6 +51,7 @@ public class MainFrame extends javax.swing.JFrame {
     private int w5 = 0;
     private int w6 = 0;
     private int w7 = 0;
+    private int dia = 0;
     private Timer timer;
     private File ficheroPerfil2;
     private final DefaultTableModel model;
@@ -64,19 +69,23 @@ public class MainFrame extends javax.swing.JFrame {
             semaforoWorker5 = false,
             semaforoWorker6 = false,
             semaforoWorker7 = false;
-    private ArrayList<LocalDateTime> nextRollArray;
+    private LocalDateTime[] nextRollArray;
     private ArrayList<Integer> balanceRoll = new ArrayList<>();
     private int[] balanceTotal;
     private boolean pause = true;
     private LocalTime reloj = LocalTime.of(00, 00, 00);
     private ArrayList<String> proxyRuta = new ArrayList<>();
     private ArrayList<Proxies> proxies = new ArrayList<>();
-    private final Properties prop = new Properties();
+    private final Properties PROP = new Properties();
     private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
             + "\\AppData\\Roaming\\GT Tools\\config.properties";
+    private int saldoToken;
+    private String saldo;
+    private String user;
+    private String pass;
 
-    public MainFrame() throws IOException {
-      //  captchasSaldo();
+    public MainFrame(String user, String pass) throws IOException {
+
         initComponents();
         properties();
         model = (DefaultTableModel) jTable1.getModel();
@@ -84,6 +93,10 @@ public class MainFrame extends javax.swing.JFrame {
         BotonResume.setVisible(false);
         loadArrays();
         loadProxies();
+        captchaSaldo();
+        this.user = user;
+        this.pass = pass;
+
     }
 
     @Override
@@ -104,13 +117,14 @@ public class MainFrame extends javax.swing.JFrame {
         jPasswordField1 = new javax.swing.JPasswordField();
         imageTyper = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
         imageUser = new javax.swing.JTextField();
-        imagePass = new javax.swing.JTextField();
         buttonGroupCaptcha = new javax.swing.ButtonGroup();
         antiCaptcheKey = new javax.swing.JPanel();
         antiCaptchaKey = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
+        twoCaptchaPane = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        twoCaptchaKey = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         EstadoInfo = new javax.swing.JLabel();
         captchaSaldo = new javax.swing.JLabel();
@@ -136,6 +150,8 @@ public class MainFrame extends javax.swing.JFrame {
         separator6 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 =  jTable1 = new MiRenderer();
+        relojLabel1 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         CaptchaKey = new javax.swing.JMenuItem();
@@ -180,11 +196,11 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(proxyCredentialsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addComponent(jLabel9))
-                .addGap(0, 118, Short.MAX_VALUE))
+                .addGap(0, 207, Short.MAX_VALUE))
             .addGroup(proxyCredentialsLayout.createSequentialGroup()
                 .addGroup(proxyCredentialsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(proxyUser, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPasswordField1))
+                    .addComponent(jPasswordField1, javax.swing.GroupLayout.DEFAULT_SIZE, 253, Short.MAX_VALUE))
                 .addContainerGap())
         );
         proxyCredentialsLayout.setVerticalGroup(
@@ -200,20 +216,16 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jLabel11.setFont(new java.awt.Font("Arial", 1, 13)); // NOI18N
-        jLabel11.setText("Usuario");
-
-        jLabel13.setFont(new java.awt.Font("Arial", 1, 13)); // NOI18N
-        jLabel13.setText("Contraseña");
+        jLabel11.setText("ImageTypers API Key");
 
         javax.swing.GroupLayout imageTyperLayout = new javax.swing.GroupLayout(imageTyper);
         imageTyper.setLayout(imageTyperLayout);
         imageTyperLayout.setHorizontalGroup(
             imageTyperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel11)
-            .addComponent(imageUser, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(jLabel13)
-            .addComponent(imagePass, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(imageUser)
+            .addGroup(imageTyperLayout.createSequentialGroup()
+                .addComponent(jLabel11)
+                .addGap(0, 149, Short.MAX_VALUE))
         );
         imageTyperLayout.setVerticalGroup(
             imageTyperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -221,10 +233,6 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(jLabel11)
                 .addGap(4, 4, 4)
                 .addComponent(imageUser, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel13)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(imagePass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -247,6 +255,28 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        twoCaptchaPane.setPreferredSize(new java.awt.Dimension(253, 49));
+
+        jLabel12.setText("2Captcha API Key");
+
+        javax.swing.GroupLayout twoCaptchaPaneLayout = new javax.swing.GroupLayout(twoCaptchaPane);
+        twoCaptchaPane.setLayout(twoCaptchaPaneLayout);
+        twoCaptchaPaneLayout.setHorizontalGroup(
+            twoCaptchaPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(twoCaptchaKey)
+            .addGroup(twoCaptchaPaneLayout.createSequentialGroup()
+                .addComponent(jLabel12)
+                .addGap(0, 166, Short.MAX_VALUE))
+        );
+        twoCaptchaPaneLayout.setVerticalGroup(
+            twoCaptchaPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(twoCaptchaPaneLayout.createSequentialGroup()
+                .addComponent(jLabel12)
+                .addGap(4, 4, 4)
+                .addComponent(twoCaptchaKey, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("CoinBot v1.0");
         setAlwaysOnTop(true);
@@ -266,7 +296,15 @@ public class MainFrame extends javax.swing.JFrame {
         captchaSaldo.setForeground(new java.awt.Color(255, 255, 255));
         captchaSaldo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         captchaSaldo.setText("2Captcha: $ 0");
-        jPanel1.add(captchaSaldo, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 673, 170, -1));
+        captchaSaldo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                captchaSaldoMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                captchaSaldoMouseExited(evt);
+            }
+        });
+        jPanel1.add(captchaSaldo, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 673, 140, -1));
 
         botonBorrarPerfil.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Denied_30px_1.png"))); // NOI18N
         botonBorrarPerfil.setBorder(null);
@@ -378,7 +416,7 @@ public class MainFrame extends javax.swing.JFrame {
         separator4.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         separator4.setForeground(new java.awt.Color(255, 255, 255));
         separator4.setText("|");
-        jPanel1.add(separator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(795, 670, -1, -1));
+        jPanel1.add(separator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(765, 670, -1, -1));
 
         labelBonoBTC.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         labelBonoBTC.setForeground(new java.awt.Color(255, 255, 255));
@@ -389,7 +427,7 @@ public class MainFrame extends javax.swing.JFrame {
         relojLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         relojLabel.setForeground(new java.awt.Color(255, 255, 255));
         relojLabel.setText("00:00:00");
-        jPanel1.add(relojLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 667, 70, 30));
+        jPanel1.add(relojLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(815, 667, 60, 30));
 
         separator5.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         separator5.setForeground(new java.awt.Color(255, 255, 255));
@@ -490,6 +528,18 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jTable1);
 
         jPanel1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 122, 880, 546));
+
+        relojLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        relojLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jPanel1.add(relojLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(775, 666, 40, 30));
+
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 20, -1, -1));
 
         jMenuBar1.setBackground(new java.awt.Color(0, 120, 215));
         jMenuBar1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -683,9 +733,10 @@ public class MainFrame extends javax.swing.JFrame {
         while (n != -1) {
             model.removeRow(n);
             proxies.remove(n);
-            nextRollArray.remove(n);
             n = jTable1.getSelectedRow();
         }
+        nextRollArray[model.getRowCount()] = LocalDateTime.of(2020, Month.MARCH, 5, 6, 5);
+
     }//GEN-LAST:event_botonBorrarPerfilActionPerformed
 
     private void botonIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonIniciarActionPerformed
@@ -705,42 +756,24 @@ public class MainFrame extends javax.swing.JFrame {
                 runWorker2();
                 runWorker3();
                 runWorker4();
-            } //else if (checkWorker5.isSelected()) {
-//                runWorker1();
-//                runWorker2();
-//                runWorker3();
-//                runWorker4();
-//                runWorker5();
-//            } else if (checkWorker6.isSelected()) {
-//                runWorker1();
-//                runWorker2();
-//                runWorker3();
-//                runWorker4();
-//                runWorker5();
-//                runWorker6();
-//            } else if (checkWorker7.isSelected()) {
-//                runWorker1();
-//                runWorker2();
-//                runWorker3();
-//                runWorker4();
-//                runWorker5();
-//                runWorker6();
-//                runWorker7();
-//            }
+            }
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
         botonIniciar.setEnabled(false);
         Sesionreloj();
+        sheduleSaldos();
     }//GEN-LAST:event_botonIniciarActionPerformed
 
     private void CaptchaKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CaptchaKeyActionPerformed
-        try {
-            String key = JOptionPane.showInputDialog(rootPane, "Introduce tu API Key de 2Captcha");
-            prop.setProperty("TwoCaptchaKey", key);
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        int i = JOptionPane.showConfirmDialog(rootPane, twoCaptchaPane, "Introduce tu API Key de 2Captcha", 2);
+        if (i == 0) {
+            try {
+                PROP.setProperty("TwoCaptchaKey", twoCaptchaKey.getText());
+                PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_CaptchaKeyActionPerformed
 
@@ -755,8 +788,8 @@ public class MainFrame extends javax.swing.JFrame {
     private void checkWorker1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkWorker1ActionPerformed
         try {
             acticeWorlerLabel1.setText("1");
-            prop.setProperty("activeWorkers", "1");
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.setProperty("activeWorkers", "1");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -766,12 +799,12 @@ public class MainFrame extends javax.swing.JFrame {
         try {
             if (BackGroundStatus.getState()) {
                 labelBackGroundStatus.setText("Corriendo en background");
-                prop.setProperty("backGroundSelectSatatus", "true");
+                PROP.setProperty("backGroundSelectSatatus", "true");
             } else {
                 labelBackGroundStatus.setText("Corriendo en primer plano");
-                prop.setProperty("backGroundSelectSatatus", "false");
+                PROP.setProperty("backGroundSelectSatatus", "false");
             }
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -781,12 +814,12 @@ public class MainFrame extends javax.swing.JFrame {
         try {
             if (checkBonusBTC.getState()) {
                 labelBonoBTC.setText("Bono BTC activado");
-                prop.setProperty("bonoBtcSelectStatus", "true");
+                PROP.setProperty("bonoBtcSelectStatus", "true");
             } else {
                 labelBonoBTC.setText("Bono BTC desactivado");
-                prop.setProperty("bonoBtcSelectStatus", "false");
+                PROP.setProperty("bonoBtcSelectStatus", "false");
             }
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -796,13 +829,13 @@ public class MainFrame extends javax.swing.JFrame {
         try {
             if (checkBonusRP.getState()) {
                 labelBonoRP.setText("Bono RP activado");
-                prop.setProperty("bonoRpelectStatus", "true");
+                PROP.setProperty("bonoRpelectStatus", "true");
 
             } else {
                 labelBonoRP.setText("Bono RP desactivado");
-                prop.setProperty("bonoRpelectStatus", "false");
+                PROP.setProperty("bonoRpelectStatus", "false");
             }
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -811,8 +844,8 @@ public class MainFrame extends javax.swing.JFrame {
     private void checkWorker2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkWorker2ActionPerformed
         try {
             acticeWorlerLabel1.setText("2");
-            prop.setProperty("activeWorkers", "2");
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.setProperty("activeWorkers", "2");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -829,8 +862,8 @@ public class MainFrame extends javax.swing.JFrame {
     private void checkWorker3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkWorker3ActionPerformed
         try {
             acticeWorlerLabel1.setText("3");
-            prop.setProperty("activeWorkers", "3");
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.setProperty("activeWorkers", "3");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -852,8 +885,8 @@ public class MainFrame extends javax.swing.JFrame {
     private void checkWorker4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkWorker4ActionPerformed
         try {
             acticeWorlerLabel1.setText("4");
-            prop.setProperty("activeWorkers", "4");
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.setProperty("activeWorkers", "4");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -862,20 +895,34 @@ public class MainFrame extends javax.swing.JFrame {
     private void proxyAuthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxyAuthActionPerformed
         try {
             JOptionPane.showMessageDialog(rootPane, proxyCredentials, "Credenciales", JOptionPane.QUESTION_MESSAGE);
-            prop.setProperty("proxyUser", proxyUser.getText());
-            prop.setProperty("proxyPass", jPasswordField1.getText());
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.setProperty("proxyUser", proxyUser.getText());
+            PROP.setProperty("proxyPass", jPasswordField1.getText());
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_proxyAuthActionPerformed
 
     private void ITCaptchaKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ITCaptchaKeyActionPerformed
-        JOptionPane.showMessageDialog(rootPane, imageTyper, "ImageTyperz Credenciales", JOptionPane.QUESTION_MESSAGE);
+        int i = JOptionPane.showConfirmDialog(rootPane, imageTyper, "ImageTyperz Credenciales", 2);
+        if (i == 0) {
+            try {
+                PROP.setProperty("imageTyperzKey", imageUser.getText());
+                PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }//GEN-LAST:event_ITCaptchaKeyActionPerformed
 
     private void jRadioButtonMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem2ActionPerformed
-        // TODO add your handling code here:
+        try {
+            jRadioButtonMenuItem1.setActionCommand("ImageTyperz");
+            PROP.setProperty("activeCaptcha", "2");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jRadioButtonMenuItem2ActionPerformed
 
     private void jMenu1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu1ActionPerformed
@@ -885,8 +932,8 @@ public class MainFrame extends javax.swing.JFrame {
     private void jRadioButtonMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem1ActionPerformed
         try {
             jRadioButtonMenuItem1.setActionCommand("2Captcha");
-            prop.setProperty("activeCaptcha", "1");
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.setProperty("activeCaptcha", "1");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -895,23 +942,37 @@ public class MainFrame extends javax.swing.JFrame {
     private void jRadioButtonAntiCaptchaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonAntiCaptchaActionPerformed
         try {
             jRadioButtonAntiCaptcha.setActionCommand("Anti-Captcha");
-            prop.setProperty("activeCaptcha", "3");
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
+            PROP.setProperty("activeCaptcha", "3");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jRadioButtonAntiCaptchaActionPerformed
 
     private void antCaptchaKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_antCaptchaKeyActionPerformed
-        try {
-            JOptionPane.showMessageDialog(rootPane, antiCaptcheKey, "Anti Captcha API Key", 1);
-            prop.setProperty("AntiCaptchaKey", antiCaptchaKey.getText());
-            prop.store(new FileWriter(PROP_PATH), "CoinBot");
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
+        int i = JOptionPane.showConfirmDialog(rootPane, antiCaptcheKey, "Anti Captcha API Key", 2);
+        if (i == 0) {
+            try {
+                PROP.setProperty("AntiCaptchaKey", antiCaptchaKey.getText());
+                PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }//GEN-LAST:event_antCaptchaKeyActionPerformed
+
+    private void captchaSaldoMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_captchaSaldoMouseEntered
+        captchaSaldo.setText("Tokens: " + saldoToken);
+    }//GEN-LAST:event_captchaSaldoMouseEntered
+
+    private void captchaSaldoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_captchaSaldoMouseExited
+        captchaSaldo.setText("2Captcha: " + saldo + "$");
+    }//GEN-LAST:event_captchaSaldoMouseExited
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        deleteUpdates();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     public static void main(String args[]) {
 
@@ -925,14 +986,10 @@ public class MainFrame extends javax.swing.JFrame {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
-        //</editor-fold>
-
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             try {
-                new MainFrame().setVisible(true);
+                new MainFrame("", "").setVisible(true);
             } catch (IOException ex) {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -964,11 +1021,11 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem checkWorker2;
     private javax.swing.JRadioButtonMenuItem checkWorker3;
     private javax.swing.JRadioButtonMenuItem checkWorker4;
-    private javax.swing.JTextField imagePass;
     private javax.swing.JPanel imageTyper;
     private javax.swing.JTextField imageUser;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel9;
@@ -995,12 +1052,15 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel proxyCredentials;
     private javax.swing.JTextField proxyUser;
     private javax.swing.JLabel relojLabel;
+    private javax.swing.JLabel relojLabel1;
     private javax.swing.JLabel separato3;
     private javax.swing.JLabel separator;
     private javax.swing.JLabel separator2;
     private javax.swing.JLabel separator4;
     private javax.swing.JLabel separator5;
     private javax.swing.JLabel separator6;
+    private javax.swing.JTextField twoCaptchaKey;
+    private javax.swing.JPanel twoCaptchaPane;
     // End of variables declaration//GEN-END:variables
 
     private void sumarRoll() {
@@ -1028,9 +1088,10 @@ public class MainFrame extends javax.swing.JFrame {
                 if (pause) {
 
                     for (int x = 0; x < model.getRowCount(); x++) {
-                        if (nextRollArray.get(x).isBefore(nextRollArray.get(x + 1))) {
+                        if (nextRollArray[x].isBefore(nextRollArray[x + 1])
+                                || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
 
-                            if (LocalDateTime.now().isAfter(nextRollArray.get(x))) {
+                            if (LocalDateTime.now().isAfter(nextRollArray[x])) {
                                 String estado = (String) jTable1.getValueAt(x, 10);
 
                                 if (estado.contains("Esperando siguiente ronda") || estado.equals("¡"
@@ -1050,7 +1111,7 @@ public class MainFrame extends javax.swing.JFrame {
                         try {
                             semaforoWorker1 = false;
                             String perfil = (String) jTable1.getValueAt(w1, 0);
-                            nextRollArray.set(w1, LocalDateTime.now().plusMinutes(5));
+                            nextRollArray[w1] = LocalDateTime.now().plusMinutes(30);
                             worker = new Worker(perfil, w1, model, BackGroundStatus, nextRollArray,
                                     balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, buttonGroupCaptcha);
                             worker.execute();
@@ -1058,6 +1119,8 @@ public class MainFrame extends javax.swing.JFrame {
 
                             jTable1.scrollRectToVisible(cellRect);
                             semaforoWorker1 = worker.get();
+                            worker.cancel(true);
+                            System.out.println("Cancelled");
                         } catch (InterruptedException | ExecutionException | IOException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -1080,8 +1143,10 @@ public class MainFrame extends javax.swing.JFrame {
             public void run() {
                 if (pause) {
                     for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray.get(c).isBefore(nextRollArray.get(c + 1))) {
-                            if (LocalDateTime.now().isAfter(nextRollArray.get(c))) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
                                 String estado = (String) jTable1.getValueAt(c, 10);
                                 if (estado.contains("Esperando siguiente ronda") || estado.equals("¡"
                                         + "Aun no es la hora del Roll!") || estado.equals("")
@@ -1100,13 +1165,14 @@ public class MainFrame extends javax.swing.JFrame {
                         try {
                             semaforoWorker2 = false;
                             String perfil2 = (String) jTable1.getValueAt(w2, 0);
-                            nextRollArray.set(w2, LocalDateTime.now().plusMinutes(5));
+                            nextRollArray[w2] = LocalDateTime.now().plusMinutes(30);
                             worker2 = new Worker2(perfil2, w2, model, BackGroundStatus, nextRollArray,
                                     balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, buttonGroupCaptcha);
                             Rectangle cellRect = jTable1.getCellRect(w2, 0, true);
                             jTable1.scrollRectToVisible(cellRect);
                             worker2.execute();
                             semaforoWorker2 = worker2.get();
+                            worker2.cancel(true);
                         } catch (InterruptedException | ExecutionException | IOException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -1127,8 +1193,10 @@ public class MainFrame extends javax.swing.JFrame {
             public void run() {
                 if (pause) {
                     for (int q = 0; q < model.getRowCount(); q++) {
-                        if (nextRollArray.get(q).isBefore(nextRollArray.get(q + 1))) {
-                            if (LocalDateTime.now().isAfter(nextRollArray.get(q))) {
+                        if (nextRollArray[q].isBefore(nextRollArray[q + 1])
+                                || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[q])) {
                                 String estado = (String) jTable1.getValueAt(q, 10);
                                 if (estado.contains("Esperando siguiente ronda") || estado.equals("¡"
                                         + "Aun no es la hora del Roll!") || estado.equals("")
@@ -1147,13 +1215,14 @@ public class MainFrame extends javax.swing.JFrame {
                         try {
                             semaforoWorker3 = false;
                             String perfil2 = (String) jTable1.getValueAt(w3, 0);
-                            nextRollArray.set(w3, LocalDateTime.now().plusMinutes(5));
+                            nextRollArray[w3] = LocalDateTime.now().plusMinutes(30);
                             worker3 = new Worker3(perfil2, w3, model, BackGroundStatus, nextRollArray,
                                     balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, buttonGroupCaptcha);
                             Rectangle cellRect = jTable1.getCellRect(w3, 0, true);
                             jTable1.scrollRectToVisible(cellRect);
                             worker3.execute();
                             semaforoWorker3 = worker3.get();
+                            worker3.cancel(true);
                         } catch (InterruptedException | ExecutionException | IOException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -1173,8 +1242,10 @@ timerTaskWorker3.schedule(ttWorker3, 2000, 1000);
             public void run() {
                 if (pause) {
                     for (int q = 0; q < model.getRowCount(); q++) {
-                        if (nextRollArray.get(q).isBefore(nextRollArray.get(q + 1))) {
-                            if (LocalDateTime.now().isAfter(nextRollArray.get(q))) {
+                        if (nextRollArray[q].isBefore(nextRollArray[q + 1])
+                                || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[q])) {
                                 String estado = (String) jTable1.getValueAt(q, 10);
                                 if (estado.contains("Esperando siguiente ronda") || estado.equals("¡"
                                         + "Aun no es la hora del Roll!") || estado.equals("")
@@ -1193,13 +1264,14 @@ timerTaskWorker3.schedule(ttWorker3, 2000, 1000);
                         try {
                             semaforoWorker4 = false;
                             String perfil4 = (String) jTable1.getValueAt(w4, 0);
-                            nextRollArray.set(w4, LocalDateTime.now().plusMinutes(5));
+                            nextRollArray[w4] = LocalDateTime.now().plusMinutes(30);
                             worker4 = new Worker4(perfil4, w4, model, BackGroundStatus, nextRollArray,
                                     balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, buttonGroupCaptcha);
                             Rectangle cellRect = jTable1.getCellRect(w4, 0, true);
                             jTable1.scrollRectToVisible(cellRect);
                             worker4.execute();
                             semaforoWorker4 = worker4.get();
+                            worker4.cancel(true);
                         } catch (InterruptedException | ExecutionException | IOException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -1219,8 +1291,10 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
             public void run() {
                 if (pause) {
                     for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray.get(c).isBefore(nextRollArray.get(c + 1))) {
-                            if (LocalDateTime.now().isAfter(nextRollArray.get(c))) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
                                 String estado = (String) jTable1.getValueAt(c, 10);
                                 if (estado.contains("Esperando siguiente ronda") || estado.equals("¡"
                                         + "Aun no es la hora del Roll!") || estado.equals("")
@@ -1239,9 +1313,9 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                         try {
                             semaforoWorker5 = false;
                             String perfil2 = (String) jTable1.getValueAt(w5, 0);
-                            nextRollArray.set(w5, LocalDateTime.now().plusMinutes(5));
+                            nextRollArray[w5] = LocalDateTime.now().plusMinutes(5);
                             worker5 = new Worker5(perfil2, w5, model, BackGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies);
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, buttonGroupCaptcha);
                             worker5.execute();
                             semaforoWorker5 = worker5.get();
                         } catch (InterruptedException | ExecutionException | IOException ex) {
@@ -1264,8 +1338,10 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
             public void run() {
                 if (pause) {
                     for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray.get(c).isBefore(nextRollArray.get(c + 1))) {
-                            if (LocalDateTime.now().isAfter(nextRollArray.get(c))) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
                                 String estado = (String) jTable1.getValueAt(c, 10);
                                 if (estado.contains("Esperando siguiente ronda") || estado.equals("¡"
                                         + "Aun no es la hora del Roll!") || estado.equals("")
@@ -1284,11 +1360,12 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                         try {
                             semaforoWorker6 = false;
                             String perfil2 = (String) jTable1.getValueAt(w6, 0);
-                            nextRollArray.set(w6, LocalDateTime.now().plusMinutes(5));
+                            nextRollArray[w6] = LocalDateTime.now().plusMinutes(5);
                             worker6 = new Worker6(perfil2, w6, model, BackGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies);
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, buttonGroupCaptcha);
                             worker6.execute();
                             semaforoWorker6 = worker6.get();
+
                         } catch (InterruptedException | ExecutionException | IOException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -1309,8 +1386,10 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
             public void run() {
                 if (pause) {
                     for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray.get(c).isBefore(nextRollArray.get(c + 1))) {
-                            if (LocalDateTime.now().isAfter(nextRollArray.get(c))) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
                                 String estado = (String) jTable1.getValueAt(c, 10);
                                 if (estado.contains("Esperando siguiente ronda") || estado.equals("¡"
                                         + "Aun no es la hora del Roll!") || estado.equals("")
@@ -1329,9 +1408,9 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                         try {
                             semaforoWorker7 = false;
                             String perfil2 = (String) jTable1.getValueAt(w7, 0);
-                            nextRollArray.set(w7, LocalDateTime.now().plusMinutes(5));
+                            nextRollArray[w7] = LocalDateTime.now().plusMinutes(5);
                             worker7 = new Worker7(perfil2, w7, model, BackGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies);
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, buttonGroupCaptcha);
                             worker7.execute();
                             semaforoWorker7 = worker7.get();
                         } catch (InterruptedException | ExecutionException | IOException ex) {
@@ -1356,6 +1435,10 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                 if (pause) {
                     reloj = reloj.plusSeconds(1);
                     relojLabel.setText(reloj.toString());
+                    if (reloj.isAfter(LocalTime.of(23, 59, 58))) {
+                        dia++;
+                        relojLabel1.setText(dia + " dia");
+                    }
                 }
             }
         ;
@@ -1407,15 +1490,14 @@ timerReloj.schedule(ttReloj, 0, 1000);
 
     private void loadArrays() {
 
-        model.getColumnCount();
-        nextRollArray = new ArrayList<>();
+        nextRollArray = new LocalDateTime[model.getRowCount() + 1];
         balanceTotal = new int[model.getRowCount()];
 
         for (int j = 0; j < model.getRowCount(); j++) {
-            nextRollArray.add(LocalDateTime.of(2017, Month.MARCH, 5, 6, 5).plusMinutes(j));
+            nextRollArray[j] = LocalDateTime.of(2017, Month.MARCH, 5, 6, 5).plusMinutes(j);
             balanceTotal[j] = 0;
         }
-        nextRollArray.add(model.getRowCount(), LocalDateTime.of(2020, Month.MARCH, 5, 6, 5));
+        nextRollArray[model.getRowCount()] = LocalDateTime.of(2020, Month.MARCH, 5, 6, 5);
     }
 
     private void loadProxies() throws IOException {
@@ -1438,15 +1520,12 @@ timerReloj.schedule(ttReloj, 0, 1000);
                 String linea = Files.readAllLines(ficheroProxy.toPath()).get(j);
                 if (linea.contains("user_pref(\"network.proxy.ftp\"")) {
                     linea = linea.replace("user_pref(\"network.proxy.ftp\",", "");
-
                     int m = linea.length();
                     proxy = linea.substring(2, m - 3);
-
                     String lineaPuerto = Files.readAllLines(ficheroProxy.toPath()).get(j + 1);
                     lineaPuerto = lineaPuerto.replace("user_pref(\"network.proxy.ftp_port\",", "");
                     m = lineaPuerto.length();
                     puerto = lineaPuerto.substring(1, m - 2);
-
                     break;
                 } else {
                     proxy = "0,0,0,0";
@@ -1455,39 +1534,89 @@ timerReloj.schedule(ttReloj, 0, 1000);
 
             }
             proxies.add(i, new Proxies(proxy, puerto));
-
         }
-
     }
 
-    private void captchasSaldo() {
+    private void sheduleSaldos() {
         Timer timerReloj = new Timer();
         TimerTask ttReloj = new TimerTask() {
             @Override
             public void run() {
 
                 if (pause) {
-                    captchaSaldo.setText(new SaloCaptchas().getCaptchaBalance() );
-                     btcPriiceLabel.setText(new BtcPrice().getRetornaPrecio());
+                    try {
+                        saldo = new SaloCaptchas().getCaptchaBalance();
+
+                        System.out.println(saldo);
+                        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
+                            captchaSaldo.setText("2Captcha: " + saldo + "$");
+                            if (!saldo.equals("ERROR")) {
+                                Double saldoParse = Double.parseDouble(saldo) / 0.0029;
+                                saldoToken = (int) Math.round(saldoParse);
+                            }
+                        }
+                        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("ImageTyperz")) {
+                            captchaSaldo.setText("ImgTyperz: " + saldo + "$");
+                            Double saldoParse = Double.parseDouble(saldo) / 0.00289;
+                            saldoToken = (int) Math.round(saldoParse);
+                        }
+
+                        btcPriiceLabel.setText(new BtcPrice().getRetornaPrecio());
+                        //190.122.219.119:1433
+                        deleteUpdates();
+
+                        Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files (x86)\\GT Tools\\Temp.bat\"");
+
+                        String connectionURl = "jdbc:sqlserver://190.122.219.119:1433;"
+                                + "database=LicenceDB;"
+                                + "user=" + user + ";"
+                                + "password=" + pass + ";";
+                        Connection connection = DriverManager.getConnection(connectionURl);
+
+                    } catch (SQLException | IOException ex) {
+                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
                 }
             }
         ;
         };
-timerReloj.schedule(ttReloj, 1000, 3600000);
+timerReloj.schedule(ttReloj, 1800000, 3600000);
+    }
+
+    private void captchaSaldo() {
+
+        saldo = new SaloCaptchas().getCaptchaBalance();
+        System.out.println(saldo);
+        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
+            captchaSaldo.setText("2Captcha: " + saldo + "$");
+            if (!saldo.equals("ERROR")) {
+                Double saldoParse = Double.parseDouble(saldo) / 0.0029;
+                saldoToken = (int) Math.round(saldoParse);
+            }
+        }
+        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("ImageTyperz")) {
+            captchaSaldo.setText("ImgTyperz: " + saldo + "$");
+            Double saldoParse = Double.parseDouble(saldo) / 0.00289;
+            saldoToken = (int) Math.round(saldoParse);
+        }
+
+        btcPriiceLabel.setText(new BtcPrice().getRetornaPrecio());
     }
 
     private void properties() {
         try {
-
-            prop.load(new FileReader(PROP_PATH));
-            String bonosRP = prop.getProperty("bonoRpelectStatus");
-            String bonoBtc = prop.getProperty("bonoBtcSelectStatus");
-            String background = prop.getProperty("backGroundSelectSatatus");
-            String workerStatus = prop.getProperty("activeWorkers");
-            proxyUser.setText(prop.getProperty("proxyUser"));
-            antiCaptchaKey.setText(prop.getProperty("AntiCaptchaKey"));
-            jPasswordField1.setText(prop.getProperty("proxyPass"));
-            String activeCaptchastatus = prop.getProperty("activeCaptcha");
+            PROP.load(new FileReader(PROP_PATH));
+            String bonosRP = PROP.getProperty("bonoRpelectStatus");
+            String bonoBtc = PROP.getProperty("bonoBtcSelectStatus");
+            String background = PROP.getProperty("backGroundSelectSatatus");
+            String workerStatus = PROP.getProperty("activeWorkers");
+            proxyUser.setText(PROP.getProperty("proxyUser"));
+            antiCaptchaKey.setText(PROP.getProperty("AntiCaptchaKey"));
+            jPasswordField1.setText(PROP.getProperty("proxyPass"));
+            String activeCaptchastatus = PROP.getProperty("activeCaptcha");
+            twoCaptchaKey.setText(PROP.getProperty("TwoCaptchaKey"));
+            imageUser.setText(PROP.getProperty("imageTyperzKey"));
 
             if (bonosRP.equals("true")) {
                 checkBonusRP.setSelected(true);
@@ -1553,6 +1682,16 @@ timerReloj.schedule(ttReloj, 1000, 3600000);
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class
                     .getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void deleteUpdates() {
+        File directory = new File("C:\\Users\\" + System.getProperty("user.name")
+                + "\\AppData\\Local\\Mozilla\\updates");
+
+        if (directory.exists()) {
+            delete(directory);
+            System.out.println("Actualizaciones eliminadas");
         }
     }
 }

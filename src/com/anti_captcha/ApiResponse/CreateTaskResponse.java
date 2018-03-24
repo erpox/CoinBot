@@ -1,7 +1,7 @@
 package com.anti_captcha.ApiResponse;
 
-import com.anti_captcha.helper.DebugHelper;
-import com.anti_captcha.helper.JsonHelper;
+import com.anti_captcha.Helper.DebugHelper;
+import com.anti_captcha.Helper.JsonHelper;
 
 import org.json.JSONObject;
 

@@ -1,7 +1,9 @@
 package com.freebitcoin.app.miners;
 
+import com.freebitcoin.app.control.AntiCaptchaControl;
 import com.freebitcoin.app.control.Proxies;
 import com.freebitcoin.app.control.TwoCaptchaFreeBTC;
+import com.freebitcoin.app.control.NewClass;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
@@ -48,17 +51,19 @@ public class Worker7 extends SwingWorker<Boolean, String> {
     private static String responseToken;
     private String balanceRoll;
     private LocalDateTime now;
-    private ArrayList<LocalDateTime> nextRollArray;
+    private LocalDateTime[] nextRollArray;
     private ArrayList<Integer> balanceRollArray;
     private int[] balanceTotalArray;
     private int finalPuntos;
     private final ArrayList<Proxies> proxies;
     private int captchaCount = 1;
+    private final ButtonGroup buttonGroupCaptcha;
+    private static boolean captcha = false;
 
-    public Worker7 (String perfil, int selector, DefaultTableModel model,
-            JCheckBoxMenuItem BackGroundStatus, ArrayList<LocalDateTime> nextRollArray,
+    public Worker7(String perfil, int selector, DefaultTableModel model,
+            JCheckBoxMenuItem BackGroundStatus, LocalDateTime[] nextRollArray,
             ArrayList<Integer> balanceRollArray, int[] balanceTotalArray,
-            JCheckBoxMenuItem checkBonusRP, JCheckBoxMenuItem checkBonusBTC, ArrayList<Proxies> proxies) throws IOException {
+            JCheckBoxMenuItem checkBonusRP, JCheckBoxMenuItem checkBonusBTC, ArrayList<Proxies> proxies, ButtonGroup buttonGroupCaptcha) throws IOException {
 
         this.perfil = perfil;
         this.selector = selector;
@@ -70,6 +75,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         this.checkBonusRP = checkBonusRP;
         this.checkBonusBTC = checkBonusBTC;
         this.proxies = proxies;
+        this.buttonGroupCaptcha = buttonGroupCaptcha;
         this.file = new File("C:\\Program Files (x86)\\GT Tools\\geckodriver.exe");
     }
 
@@ -77,29 +83,30 @@ public class Worker7 extends SwingWorker<Boolean, String> {
     protected Boolean doInBackground() throws Exception {
 
         try {
+
             Inicializar(perfil);
             loadSite();
             checkBonusPoint();
             checkBonusFreeBTC();
-            //rollAction();
-            freeRollPlay();
+            rollAction();
+            //freeRollPlay();
             postear();
 
             return false;
         } catch (NoSuchSessionException ex) {
             return false;
         } catch (WebDriverException ex) {
-            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex); 
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
             model.setValueAt("Ha ocurrido un error", selector, 10);
             now = LocalDateTime.now().plusMinutes(5);
-            nextRollArray.set(selector, now);
+            nextRollArray[selector]= now;
             driver.quit();
             return false;
         } catch (Exception e) {
-            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);           
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
             model.setValueAt("Ha ocurrido un error", selector, 10);
             now = LocalDateTime.now().plusMinutes(5);
-            nextRollArray.set(selector, now);
+             nextRollArray[selector]= now;
             driver.quit();
             return false;
         }
@@ -107,30 +114,31 @@ public class Worker7 extends SwingWorker<Boolean, String> {
 
     @Override
     protected void done() {
-
     }
 
     protected void Inicializar(String Perfil) throws WebDriverException, InterruptedException {
         model.setValueAt("Cargando perfil... ", selector, 10);
         System.setProperty("webdriver.gecko.driver", file.getAbsolutePath());
         System.setProperty("webdriver.firefox.bin", "C:\\Program Files\\Mozilla Firefox\\firefox.exe");
+        System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
         ProfilesIni profile = new ProfilesIni();
         FirefoxProfile myprofile = profile.getProfile(Perfil);
+
         FirefoxOptions options = new FirefoxOptions().setProfile(myprofile);
+
         options.addPreference("signon.autologin.proxy", true);
         if (BackGroundStatus.isSelected()) {
             options.addArguments("--headless");
         }
         model.setValueAt("Abriendo navegador...", selector, 10);
         driver = new FirefoxDriver(options);
-        //driver.get("https://PUHO1jNHar:GSTNlJ1yIZ@154.62.79.60:58542");
         driver.manage().window().maximize();
         model.setValueAt("Cargando https://freebitco.in/", selector, 10);
         try {
             driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
             driver.get("https://freebitco.in");
         } catch (TimeoutException ex) {
-            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
+            // Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
             driver.quit();
             Inicializar(perfil);
         }
@@ -148,17 +156,16 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         if (driver.findElement(By.id("time_remaining")).isDisplayed()) {
 
             String timeRemaining = driver.findElement(By.id("time_remaining")).getText();
-            String hora="";
+            String hora = "";
             try {
                 int minutos = Integer.parseInt(timeRemaining.substring(0, 2).trim());
-               hora = LocalTime.now().plus(minutos + 2, ChronoUnit.MINUTES).format(DateTimeFormatter.ofPattern("hh:mm a"));
+                hora = LocalTime.now().plus(minutos + 2, ChronoUnit.MINUTES).format(DateTimeFormatter.ofPattern("hh:mm a"));
                 now = LocalDateTime.now().plus(minutos, ChronoUnit.MINUTES);
             } catch (NumberFormatException e) {
                 hora = LocalTime.now().plus(5, ChronoUnit.MINUTES).format(DateTimeFormatter.ofPattern("hh:mm a"));
                 now = LocalDateTime.now().plus(5, ChronoUnit.MINUTES);
             }
-            nextRollArray.set(selector, now);
-
+             nextRollArray[selector]= now;
             try {
                 String bonu = driver.findElement(By.xpath("//div[@id='bonus_container_free_points']/p/span")).getText().substring(0, 3).trim(); //bonus de puntos
                 bonoRPFin = driver.findElement(By.id("bonus_span_free_points")).getText().substring(0, 2) + " Hrs";
@@ -169,7 +176,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
                 }
 
             } catch (NoSuchElementException ex) {
-                Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
+                //  Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
                 bonusRewarP = "No";
             }
 
@@ -182,7 +189,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
                     bonusFreeBTC = bonuBTC;
                 }
             } catch (NoSuchElementException ex) {
-                Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
+                // Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
                 bonusFreeBTC = "No";
                 bonoBTCFin = " - ";
             }
@@ -191,7 +198,6 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             model.setValueAt((int) balanceParse, selector, 1);
 
             balanceRollArray.add(0);
-
             model.setValueAt(balancePuntosParse, selector, 2);
             model.setValueAt(0, selector, 3);
             model.setValueAt(0, selector, 4);
@@ -220,7 +226,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
                 bonusRewarP = bonu + " RP";
             }
         } catch (NoSuchElementException e) {
-           Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
+            //    Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
             if (checkBonusRP.getState()) {
                 activarBonusPuntos();
             } else {
@@ -241,7 +247,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
                 bonusFreeBTC = bonuBTC;
             }
         } catch (NoSuchElementException e) {
-            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
+            //     Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
             if (checkBonusBTC.getState() && bonusRewarP.contains("100")) {
                 activarBonusFreeBTC();
             } else {
@@ -258,7 +264,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         try {
             driver.findElement(By.linkText("Got it!")).click();
         } catch (NoSuchElementException e) {
-            
+
             System.out.println("El banner no esta activo");
         }
         if (finalPuntos >= 12 && finalPuntos < 120) {
@@ -308,7 +314,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         try {
             driver.findElement(By.linkText("Got it!")).click();
         } catch (NoSuchElementException e) {
-            
+
             System.out.println("El banner no esta activo");
         }
 
@@ -317,7 +323,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             driver.findElement(By.linkText("REWARDS")).click();
             driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
             driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_10')\"]")).click();
-            finalPuntos=finalPuntos-32;
+            finalPuntos = finalPuntos - 32;
             bonoBTCFin = "24 Hrs";
             return bonusFreeBTC = "10%";
 
@@ -326,7 +332,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             driver.findElement(By.linkText("REWARDS")).click();
             driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
             driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_50')\"]")).click();
-            finalPuntos=finalPuntos-160;
+            finalPuntos = finalPuntos - 160;
             bonoBTCFin = "24 Hrs";
             return bonusFreeBTC = "50%";
 
@@ -335,7 +341,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             driver.findElement(By.linkText("REWARDS")).click();
             driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
             driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_100')\"]")).click();
-            finalPuntos=finalPuntos-320;
+            finalPuntos = finalPuntos - 320;
             bonoBTCFin = "24 Hrs";
             return bonusFreeBTC = "100%";
 
@@ -344,7 +350,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             driver.findElement(By.linkText("REWARDS")).click();
             driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
             driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_500')\"]")).click();
-            finalPuntos=finalPuntos-1600;
+            finalPuntos = finalPuntos - 1600;
             bonoBTCFin = "24 Hrs";
             return bonusFreeBTC = "500%";
         } else if (finalPuntos >= 3200) {
@@ -352,7 +358,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             driver.findElement(By.linkText("REWARDS")).click();
             driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
             driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_1000')\"]")).click();
-            finalPuntos=finalPuntos-3200;
+            finalPuntos = finalPuntos - 3200;
             bonoBTCFin = "24 Hrs";
             return bonusFreeBTC = "1000%";
         }
@@ -361,22 +367,28 @@ public class Worker7 extends SwingWorker<Boolean, String> {
     }
 
     protected void rollAction() throws IOException, InterruptedException, NoSuchSessionException {
-
         model.setValueAt("Resolviendo Captcha... Intento " + captchaCount, selector, 10);
-        TwoCaptchaFreeBTC prueba = new TwoCaptchaFreeBTC(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
-        responseToken = prueba.Tokenizer();
+        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
+            TwoCaptchaFreeBTC prueba = new TwoCaptchaFreeBTC(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
+            responseToken = prueba.Tokenizer();
+            if (responseToken.contains("ERROR_WRONG_USER_KEY")) {
+                model.setValueAt("2Captcha API Key invalido", selector, 10);
+                killDriver();
+            }
+
+        } else if (buttonGroupCaptcha.getSelection().getActionCommand().equals("Anti-Captcha")) {
+            AntiCaptchaControl antiCaptcha = new AntiCaptchaControl(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
+            responseToken = antiCaptcha.captchaProxy();
+        }
+
         JavascriptExecutor jse = (JavascriptExecutor) driver;
         jse.executeScript("document.getElementById('g-recaptcha-response').style.display='block';");
-        if (responseToken.contains("ERROR_WRONG_USER_KEY")) {
-            model.setValueAt("2Captcha API Key invalido", selector, 10);
-            killDriver();
-        }
         driver.findElement(By.id("g-recaptcha-response")).sendKeys(responseToken);
 
         try {
             driver.findElement(By.linkText("Got it!")).click();
         } catch (NoSuchElementException e) {
-            
+
             System.out.println("El banner no esta activo");
         }
 
@@ -407,7 +419,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             WebElement element = wait.until(
                     ExpectedConditions.visibilityOfElementLocated(By.id("free_play_result")));
         } catch (Exception e) {
-         Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
             driver.navigate().refresh();
             rollAction();
         }
@@ -448,9 +460,9 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         model.setValueAt(hora, selector, 9);
 
         balanceRollArray.add(Integer.parseInt(balanceRoll));
-        nextRollArray.set(selector, now);
+         nextRollArray[selector]= now;
         balanceTotalArray[selector] = (int) finall;
-      
+
         killDriver();
     }
 
@@ -478,7 +490,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         model.setValueAt(bonoBTCFin, selector, 8);
         model.setValueAt("-", selector, 9);
         model.setValueAt("IP Baneada", selector, 10);
-        nextRollArray.set(selector, now);
+         nextRollArray[selector]= now;
         driver.quit();
         driver.findElement(By.id("free_play_form_button")).click();
     }
@@ -501,7 +513,6 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             try {
                 driver.findElement(By.linkText("Got it!")).click();
             } catch (NoSuchElementException e) {
-               
                 System.out.println("El banner no esta activo");
             }
 
@@ -525,13 +536,13 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             postear();
 
         } catch (ElementClickInterceptedException | MoveTargetOutOfBoundsException ex) {
-            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
+            //  Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
             driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
             driver.switchTo().defaultContent();
             rollAction();
-            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
+            //  Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchElementException e) {
-            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
+            // Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
             sinCaptpcha();
 
         }
@@ -544,7 +555,7 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             WebElement element = wait.until(
                     ExpectedConditions.visibilityOfElementLocated(By.id("free_play_result")));
         } catch (Exception e) {
-           Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
+            // Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
             driver.navigate().refresh();
             rollAction();
         }

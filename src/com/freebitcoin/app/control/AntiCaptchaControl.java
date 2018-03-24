@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.freebitcoin.app.control;
 
 import com.anti_captcha.Api.NoCaptcha;
-import com.anti_captcha.helper.DebugHelper;
+import com.anti_captcha.Api.NoCaptchaProxyless;
+import com.anti_captcha.Helper.DebugHelper;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,10 +12,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author Eduardo
- */
 public class AntiCaptchaControl {
 
     private String responseToken;
@@ -34,13 +26,14 @@ public class AntiCaptchaControl {
             + "\\AppData\\Roaming\\GT Tools\\config.properties";
 
     public AntiCaptchaControl(String proxy, String puertoStr) {
-        this.proxy = proxy;
-        this.puertoStr = puertoStr;
+        this.proxy = proxy.trim();
+        this.puertoStr = puertoStr.trim();
         loadProp();
 
     }
 
     public String captchaProxy() {
+
         try {
             DebugHelper.setVerboseMode(true);
 
@@ -62,6 +55,38 @@ public class AntiCaptchaControl {
                         DebugHelper.Type.ERROR
                 );
             } else if (!api.waitForResult()) {
+                responseToken = api.getErrorMessage();
+                System.out.println(responseToken);
+                if (responseToken.contains("Could not connect to proxy")    
+                        || responseToken.contains("Proxy IP is banned by target service")
+                        || responseToken.contains("Connection to proxy")
+                        || responseToken==null) {
+
+                    responseToken = captchaProxyLess();
+                }
+            } else {
+                responseToken = api.getTaskSolution().getGRecaptchaResponse();
+            }
+        } catch (MalformedURLException | InterruptedException ex) {
+            Logger.getLogger(AntiCaptchaControl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println(responseToken);
+        return responseToken;
+    }
+
+    public String captchaProxyLess() {
+        try {
+
+            NoCaptchaProxyless api = new NoCaptchaProxyless();
+            api.setClientKey(apiKey);
+            api.setWebsiteUrl(new URL("https://freebitco.in/"));
+            api.setWebsiteKey("6Lc6zQQTAAAAAD8TgxgC59CXtm1G56QLu8G7Q53K");
+
+            if (!api.createTask()) {
+
+                responseToken = api.getErrorMessage();
+
+            } else if (!api.waitForResult()) {
                 responseToken = "Could not solve the captcha.";
             } else {
                 responseToken = api.getTaskSolution().getGRecaptchaResponse();
@@ -70,7 +95,6 @@ public class AntiCaptchaControl {
             Logger.getLogger(AntiCaptchaControl.class.getName()).log(Level.SEVERE, null, ex);
         }
         return responseToken;
-
     }
 
     private void loadProp() {
@@ -89,6 +113,5 @@ public class AntiCaptchaControl {
             Logger.getLogger(AntiCaptchaControl.class
                     .getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 }

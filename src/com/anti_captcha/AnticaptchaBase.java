@@ -3,10 +3,10 @@ package com.anti_captcha;
 import com.anti_captcha.ApiResponse.BalanceResponse;
 import com.anti_captcha.ApiResponse.CreateTaskResponse;
 import com.anti_captcha.ApiResponse.TaskResultResponse;
-import com.anti_captcha.helper.DebugHelper;
+import com.anti_captcha.Helper.DebugHelper;
 import com.anti_captcha.Helper.HttpHelper;
-import com.anti_captcha.helper.JsonHelper;
-import com.anti_captcha.helper.StringHelper;
+import com.anti_captcha.Helper.JsonHelper;
+import com.anti_captcha.Helper.StringHelper;
 import com.anti_captcha.Http.HttpRequest;
 
 import org.json.JSONException;

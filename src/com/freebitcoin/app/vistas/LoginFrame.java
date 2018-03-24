@@ -2,12 +2,16 @@ package com.freebitcoin.app.vistas;
 
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -19,12 +23,15 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     private static String user;
     private static String password;
     private Connection connection;
+    private final Properties PROP = new Properties();
+    private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
+            + "\\AppData\\Roaming\\GT Tools\\config.properties";
 
     public LoginFrame(String[] systemInfo) {
         initComponents();
         jLabel8.setVisible(false);
         this.systemInfo = systemInfo;
-
+        proper();
     }
 
     @Override
@@ -39,7 +46,6 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
 
         jPanel2 = new javax.swing.JPanel();
         jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel2 = new javax.swing.JLabel();
@@ -53,6 +59,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
+        jPasswordField1 = new javax.swing.JPasswordField();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
@@ -69,11 +76,6 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jTextField1.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
         jTextField1.setBorder(null);
         jPanel2.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, 180, 30));
-
-        jTextField2.setBackground(new java.awt.Color(240, 240, 240));
-        jTextField2.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
-        jTextField2.setBorder(null);
-        jPanel2.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 170, 170, 30));
 
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/inicioclaro.png"))); // NOI18N
         jButton1.setBorder(null);
@@ -117,6 +119,11 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 173, -1, -1));
 
         jCheckBox1.setText("Guardar contraseña");
+        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox1ActionPerformed(evt);
+            }
+        });
         jPanel2.add(jCheckBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 210, -1, -1));
 
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Cancel_25px.png"))); // NOI18N
@@ -143,6 +150,10 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jPanel2.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 250, 150, 20));
 
+        jPasswordField1.setBackground(new java.awt.Color(240, 240, 240));
+        jPasswordField1.setBorder(null);
+        jPanel2.add(jPasswordField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 170, 170, 30));
+
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(264, 0, 340, 400));
 
         jPanel1.setBackground(new java.awt.Color(245, 245, 245));
@@ -166,6 +177,16 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         System.exit(0);
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
+        try {
+            PROP.setProperty("user", jTextField1.getText());
+            PROP.setProperty("pass", jPasswordField1.getText());
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+        } catch (IOException ex) {
+            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jCheckBox1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -181,14 +202,15 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
  private boolean dbConnection() {
         try {
-            String connectionURl = "jdbc:sqlserver://localhost;"
+            //190.122.219.119:1433
+            String connectionURl = "jdbc:sqlserver://190.122.219.119:1433;"
                     + "database=LicenceDB;"
                     + "user=" + user + ";"
                     + "password=" + password + ";";
@@ -212,7 +234,6 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
                 JOptionPane.showMessageDialog(this, "Ha superado el limite de sesiones activas", "Error de inicio de sesion", JOptionPane.ERROR_MESSAGE);
                 jButton1.setEnabled(true);
             }
-
             return false;
         }
     }
@@ -239,37 +260,30 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     public void run() {
         int f = 0;
         user = jTextField1.getText();
-        password = jTextField2.getText();
+        password = jPasswordField1.getText();
 
         jLabel9.setText("Iniciando sesión");
         jLabel8.setVisible(true);
         jButton1.setEnabled(false);
-        if (dbConnection()) {
-            resulSetLicencia();
-            for (int i = 0; i < 5; i++) {
-                if (systemInfo[i].equals(systemInfoDB[i])) {
-                    f++;
-                }
+        if (!dbConnection()) {
+            try {
+                new MainFrame(user, password).setVisible(true);
+            } catch (IOException ex) {
+                Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (f == 5) {
-                try {
-                    jLabel9.setText("");
-                    jLabel8.setVisible(false);
-                    JOptionPane.showMessageDialog(rootPane, "Inicio de sesion satisfactorio", "Let's Make Money", 1);
+            this.dispose();
+        }
+    }
 
-                    new MainFrame().setVisible(true);
-                    this.dispose();
-                } catch (IOException ex) {
-                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else {
-                jLabel9.setText("");
-                jLabel8.setVisible(false);
-                JOptionPane.showMessageDialog(rootPane, "Este equipo no esta "
-                        + "autorizado para el uso de este programa", "Error de activacion", JOptionPane.ERROR_MESSAGE);
-
-                System.exit(0);
-            }
+    public final void proper() {
+        try {
+            PROP.load(new FileReader(PROP_PATH));
+            jTextField1.setText(PROP.getProperty("user"));
+            jPasswordField1.setText(PROP.getProperty("pass"));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

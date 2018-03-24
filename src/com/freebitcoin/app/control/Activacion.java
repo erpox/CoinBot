@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.freebitcoin.app.control;
 
 import com.freebitcoin.app.vistas.LoginFrame;
@@ -21,7 +17,6 @@ public class Activacion {
     private static String motherIDsN;
 
     private void cpuID() {
-        // String property = "";
 
         try {
             Process processCpuID = Runtime.getRuntime().exec(new String[]{"wmic", "cpu", "get", "ProcessorId"});
@@ -29,7 +24,6 @@ public class Activacion {
             Scanner sc = new Scanner(processCpuID.getInputStream());
             sc.next();
             cpuIDsN = sc.next();
-            //   cpuID = property + ":" + serial;
             System.out.println(cpuIDsN);
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
@@ -96,16 +90,16 @@ public class Activacion {
         }
     }
 
-//    public static void main(String[] args) throws IOException, InterruptedException {
-//        Activacion acti = new Activacion();
-//        acti.cpuID();
-//        acti.hardDiskDriveID();
-//        acti.biosID();
-//        acti.uddID();
-//        acti.motherID();
-//        String[] systemInfo = {cpuIDsN, hddSN, biosIDsN, uddIDsN, motherIDsN};
-//
-//            Thread.sleep(8000);
-//            new LoginFrame(systemInfo).setVisible(true);
-//    }
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Activacion acti = new Activacion();
+        acti.cpuID();
+        acti.hardDiskDriveID();
+        acti.biosID();
+        acti.uddID();
+        acti.motherID();
+        String[] systemInfo = {cpuIDsN, hddSN, biosIDsN, uddIDsN, motherIDsN};
+
+            Thread.sleep(8000);
+            new LoginFrame(systemInfo).setVisible(true);
+    }
 }

@@ -1,7 +1,8 @@
 package com.freebitcoin.app.control;
 
 import com.anti_captcha.Api.ImageToText;
-import com.anti_captcha.helper.DebugHelper;
+import com.anti_captcha.Helper.DebugHelper;
+import com.imagetyperzapi.ImageTyperzAPI;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,12 +28,14 @@ public class SaloCaptchas {
         try {
             prop.load(new FileReader(PROP_PATH));
             activeCaptch2 = prop.getProperty("activeCaptcha");
-            
+
             switch (activeCaptch2) {
                 case "1":
-                    return TwoCaptcha();
+                    return twoCaptcha();
+                case "2":
+                    return imageTyperz();
                 case "3":
-                    return AntiCaptcha();
+                    return antiCaptcha();
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(SaloCaptchas.class.getName()).log(Level.SEVERE, null, ex);
@@ -42,7 +45,7 @@ public class SaloCaptchas {
         return null;
     }
 
-    private String TwoCaptcha() {
+    private String twoCaptcha() {
         String saldo = "";
         try {
             String ApiKey = prop.getProperty("TwoCaptchaKey");;
@@ -51,13 +54,15 @@ public class SaloCaptchas {
             URLConnection conn = url.openConnection();
             InputStream is = conn.getInputStream();
             Scanner sc = new Scanner(is);
-            saldo = sc.next();
+            //System.out.println(sc.next());
+            saldo = sc.next().substring(0, 5);
             System.out.println(saldo);
 
             return saldo;
+
         } catch (UnknownHostException e) {
             System.out.println(e.getMessage());
-            return saldo = "No hay conexion";
+            return saldo = "ERROR";
 
         } catch (MalformedURLException ex) {
             Logger.getLogger(SaloCaptchas.class
@@ -68,10 +73,10 @@ public class SaloCaptchas {
                     .getLogger(SaloCaptchas.class
                             .getName()).log(Level.SEVERE, null, ex);
         }
-        return saldo = "No hay conexion";
+        return saldo = "ERROR";
     }
 
-    private String AntiCaptcha() {
+    private String antiCaptcha() {
         DebugHelper.setVerboseMode(true);
 
         ImageToText api = new ImageToText();
@@ -84,6 +89,21 @@ public class SaloCaptchas {
         } else {
             System.out.println(balance);
             return String.valueOf(balance);
+        }
+    }
+
+    private String imageTyperz() {
+        String balance;
+        try {
+            String apiKey = prop.getProperty("imageTyperzKey");
+            ImageTyperzAPI typerz = new ImageTyperzAPI(apiKey);
+            balance = typerz.account_balance();
+
+            return balance;
+
+        } catch (Exception ex) {
+            Logger.getLogger(SaloCaptchas.class.getName()).log(Level.SEVERE, null, ex);
+            return balance = "ERROR";
         }
     }
 }

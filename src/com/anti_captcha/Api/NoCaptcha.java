@@ -1,6 +1,6 @@
 package com.anti_captcha.Api;
 
-import com.anti_captcha.helper.DebugHelper;
+import com.anti_captcha.Helper.DebugHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
