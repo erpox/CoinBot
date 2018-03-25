@@ -151,7 +151,6 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 =  jTable1 = new MiRenderer();
         relojLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         CaptchaKey = new javax.swing.JMenuItem();
@@ -532,14 +531,6 @@ public class MainFrame extends javax.swing.JFrame {
         relojLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         relojLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jPanel1.add(relojLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(775, 666, 40, 30));
-
-        jButton1.setText("jButton1");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 20, -1, -1));
 
         jMenuBar1.setBackground(new java.awt.Color(0, 120, 215));
         jMenuBar1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -970,31 +961,27 @@ public class MainFrame extends javax.swing.JFrame {
         captchaSaldo.setText("2Captcha: " + saldo + "$");
     }//GEN-LAST:event_captchaSaldoMouseExited
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        deleteUpdates();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    public static void main(String args[]) {
-
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Metal".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-
-        java.awt.EventQueue.invokeLater(() -> {
-            try {
-                new MainFrame("", "").setVisible(true);
-            } catch (IOException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Metal".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//
+//        java.awt.EventQueue.invokeLater(() -> {
+//            try {
+//                new MainFrame("", "").setVisible(true);
+//            } catch (IOException ex) {
+//                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        });
+//    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBoxMenuItem BackGroundStatus;
     private javax.swing.JButton BotonPause;
@@ -1023,7 +1010,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem checkWorker4;
     private javax.swing.JPanel imageTyper;
     private javax.swing.JTextField imageUser;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel15;
@@ -1565,9 +1551,9 @@ timerReloj.schedule(ttReloj, 0, 1000);
                         //190.122.219.119:1433
                         deleteUpdates();
 
-                        Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files (x86)\\GT Tools\\Temp.bat\"");
+                        Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
 
-                        String connectionURl = "jdbc:sqlserver://190.122.219.119:1433;"
+                        String connectionURl = "jdbc:sqlserver://localhost;"
                                 + "database=LicenceDB;"
                                 + "user=" + user + ";"
                                 + "password=" + pass + ";";

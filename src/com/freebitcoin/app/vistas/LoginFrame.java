@@ -265,7 +265,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jLabel9.setText("Iniciando sesión");
         jLabel8.setVisible(true);
         jButton1.setEnabled(false);
-        if (!dbConnection()) {
+        if (dbConnection()) {
             try {
                 new MainFrame(user, password).setVisible(true);
             } catch (IOException ex) {

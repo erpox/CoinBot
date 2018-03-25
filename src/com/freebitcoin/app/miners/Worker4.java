@@ -75,7 +75,7 @@ public class Worker4 extends SwingWorker<Boolean, String> {
         this.checkBonusBTC = checkBonusBTC;
         this.proxies = proxies;
         this.buttonGroupCaptcha = buttonGroupCaptcha;
-        this.file = new File("C:\\Program Files (x86)\\GT Tools\\geckodriver.exe");
+        this.file = new File("C:\\Program Files\\GT Tools\\geckodriver.exe");
     }
 
     @Override
