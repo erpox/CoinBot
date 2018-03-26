@@ -367,6 +367,7 @@ public class Worker extends SwingWorker<Boolean, String> {
 
     protected void rollAction() throws IOException, InterruptedException, NoSuchSessionException {
         model.setValueAt("Resolviendo Captcha... Intento " + captchaCount, selector, 10);
+        driver.findElement(By.linkText("FREE BTC")).click();
 
         if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
             TwoCaptchaFreeBTC prueba = new TwoCaptchaFreeBTC(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());

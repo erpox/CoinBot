@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.freebitcoin.app.control;
 
 import com.imagetyperzapi.ImageTyperzAPI;
@@ -19,9 +14,9 @@ public class ImageTyperzControl {
 
     private static String responseToken;
     private String captchaId;
-    private static String apiKey;
-    private static String googleKey;
-    private static String pageUrl;
+    private String apiKey;
+    private final String googleKey;
+    private final String pageUrl;
     private static ImageTyperzAPI typerz;
     private static String proxyUser;
     private static String proxyPass;
@@ -32,15 +27,15 @@ public class ImageTyperzControl {
 
     public ImageTyperzControl(String proxy, String puerto) {
 
-        ImageTyperzControl.googleKey = "6Lc6zQQTAAAAAD8TgxgC59CXtm1G56QLu8G7Q53K";
-        ImageTyperzControl.pageUrl = "https://freebitco.in/";
+        googleKey = "6Lc6zQQTAAAAAD8TgxgC59CXtm1G56QLu8G7Q53K";
+        pageUrl = "https://freebitco.in/";
         ImageTyperzControl.proxy = proxy.trim() + ":" + puerto.trim();
 
         try {
             prop.load(new FileReader(PROP_PATH));
-            this.apiKey = prop.getProperty("TimageTyperzKey");
-            this.proxyUser = prop.getProperty("proxyUser");
-            this.proxyPass = prop.getProperty("proxyPass");
+            apiKey = prop.getProperty("imageTyperzKey");
+            ImageTyperzControl.proxyUser = prop.getProperty("proxyUser");
+            ImageTyperzControl.proxyPass = prop.getProperty("proxyPass");
         } catch (IOException ex) {
             Logger.getLogger(TwoCaptchaFreeBTC.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -53,7 +48,7 @@ public class ImageTyperzControl {
 
                 captchaId = typerz.submit_recaptcha(pageUrl, googleKey, proxy);
 
-            } else if (proxy.contains("0,0,0,0")) {
+            } else if (proxy.contains("0.0.0.0")) {
                 captchaId = typerz.submit_recaptcha(pageUrl, googleKey);
             } else {
                 System.out.println("usnado proxy con auth");
@@ -64,11 +59,17 @@ public class ImageTyperzControl {
             while (typerz.in_progress(captchaId)) {
                 TimeUnit.SECONDS.sleep(5);     // sleep for 10 seconds
             }
-            return responseToken = typerz.retrieve_captcha(captchaId);
-            
+
+            responseToken = typerz.retrieve_captcha(captchaId);
+            System.out.println(responseToken);
+            return responseToken;
+
         } catch (Exception ex) {
             Logger.getLogger(ImageTyperzControl.class.getName()).log(Level.SEVERE, null, ex);
+            responseToken = "error";
         }
-        return responseToken="error";
+        
+        System.out.println(responseToken);
+        return responseToken;
     }
 }

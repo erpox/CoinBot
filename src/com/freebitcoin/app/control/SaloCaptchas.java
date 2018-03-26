@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class SaloCaptchas {
 
     private String activeCaptch2;
-    private Properties prop = new Properties();
+    private final Properties prop = new Properties();
     private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
             + "\\AppData\\Roaming\\GT Tools\\config.properties";
 
@@ -46,7 +46,7 @@ public class SaloCaptchas {
     }
 
     private String twoCaptcha() {
-        String saldo = "";
+        String saldo;
         try {
             String ApiKey = prop.getProperty("TwoCaptchaKey");;
             String urlString = "http://2captcha.com/res.php?key=" + ApiKey + "&action=getbalance";

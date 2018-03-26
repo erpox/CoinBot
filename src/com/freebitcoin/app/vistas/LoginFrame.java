@@ -19,7 +19,7 @@ import javax.swing.JOptionPane;
 public class LoginFrame extends javax.swing.JFrame implements Runnable {
 
     private final String[] systemInfo;
-    private String[] systemInfoDB = new String[5];
+    private final String[] systemInfoDB = new String[5];
     private static String user;
     private static String password;
     private Connection connection;
@@ -65,14 +65,16 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("CoinBot v1.0");
+        setBackground(new java.awt.Color(250, 250, 250));
         setIconImage(getIconImage());
         setUndecorated(true);
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        jPanel2.setBackground(new java.awt.Color(250, 250, 250));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTextField1.setBackground(new java.awt.Color(240, 240, 240));
+        jTextField1.setBackground(new java.awt.Color(250, 250, 250));
         jTextField1.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
         jTextField1.setBorder(null);
         jPanel2.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, 180, 30));
@@ -118,6 +120,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Password_1_22px.png"))); // NOI18N
         jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 173, -1, -1));
 
+        jCheckBox1.setBackground(new java.awt.Color(250, 250, 250));
         jCheckBox1.setText("Guardar contraseña");
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -126,6 +129,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         });
         jPanel2.add(jCheckBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 210, -1, -1));
 
+        jButton2.setBackground(new java.awt.Color(250, 250, 250));
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Cancel_25px.png"))); // NOI18N
         jButton2.setBorder(null);
         jButton2.setBorderPainted(false);
@@ -150,7 +154,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jPanel2.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 250, 150, 20));
 
-        jPasswordField1.setBackground(new java.awt.Color(240, 240, 240));
+        jPasswordField1.setBackground(new java.awt.Color(250, 250, 250));
         jPasswordField1.setBorder(null);
         jPanel2.add(jPasswordField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 170, 170, 30));
 
@@ -182,6 +186,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
             PROP.setProperty("user", jTextField1.getText());
             PROP.setProperty("pass", jPasswordField1.getText());
             PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+
         } catch (IOException ex) {
             Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -207,11 +212,11 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
- private boolean dbConnection() {
+ 
+    private boolean dbConnection() {
         try {
-            //190.122.219.119:1433
-            String connectionURl = "jdbc:sqlserver://190.122.219.119:1433;"
-                    + "database=LicenceDB;"
+            String connectionURl = "jdbc:sqlserver://54.245.164.121:1433;;"
+                    + "database=licenceDB;"
                     + "user=" + user + ";"
                     + "password=" + password + ";";
             connection = DriverManager.getConnection(connectionURl);
@@ -223,12 +228,16 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
                 jLabel8.setVisible(false);
                 JOptionPane.showMessageDialog(this, "No se pudo conectar con el servidor", "Error de conexion", JOptionPane.ERROR_MESSAGE);
                 jButton1.setEnabled(true);
-            } else if (e.getMessage().contains("Error de inicio de sesión ") || e.getMessage().contains("Login failed for user")) {
+                
+            } else if (e.getMessage().contains("Error de inicio de sesión ") 
+                    || e.getMessage().contains("Login failed for user")) {
                 jLabel9.setText("");
                 jLabel8.setVisible(false);
                 JOptionPane.showMessageDialog(this, "Usuario o clave invalida", "Error de inicio de sesion", JOptionPane.ERROR_MESSAGE);
                 jButton1.setEnabled(true);
-            } else if (e.getMessage().contains("ejecución del desencadenador")) {
+                
+            } else if (e.getMessage().contains("ejecución del desencadenador") 
+                    || e.getMessage().contains("trigger execution")) {
                 jLabel9.setText("");
                 jLabel8.setVisible(false);
                 JOptionPane.showMessageDialog(this, "Ha superado el limite de sesiones activas", "Error de inicio de sesion", JOptionPane.ERROR_MESSAGE);

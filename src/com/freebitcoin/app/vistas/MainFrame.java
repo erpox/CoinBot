@@ -74,15 +74,16 @@ public class MainFrame extends javax.swing.JFrame {
     private int[] balanceTotal;
     private boolean pause = true;
     private LocalTime reloj = LocalTime.of(00, 00, 00);
-    private ArrayList<String> proxyRuta = new ArrayList<>();
-    private ArrayList<Proxies> proxies = new ArrayList<>();
+    private final ArrayList<String> proxyRuta = new ArrayList<>();
+    private final ArrayList<Proxies> proxies = new ArrayList<>();
     private final Properties PROP = new Properties();
     private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
             + "\\AppData\\Roaming\\GT Tools\\config.properties";
     private int saldoToken;
     private String saldo;
-    private String user;
-    private String pass;
+    private final String user;
+    private final String pass;
+    private String captchaStr;
 
     public MainFrame(String user, String pass) throws IOException {
 
@@ -93,7 +94,7 @@ public class MainFrame extends javax.swing.JFrame {
         BotonResume.setVisible(false);
         loadArrays();
         loadProxies();
-        captchaSaldo();
+        sheduleSaldos();
         this.user = user;
         this.pass = pass;
 
@@ -294,7 +295,7 @@ public class MainFrame extends javax.swing.JFrame {
         captchaSaldo.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
         captchaSaldo.setForeground(new java.awt.Color(255, 255, 255));
         captchaSaldo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        captchaSaldo.setText("2Captcha: $ 0");
+        captchaSaldo.setText("Saldo Captcha");
         captchaSaldo.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 captchaSaldoMouseEntered(evt);
@@ -753,7 +754,6 @@ public class MainFrame extends javax.swing.JFrame {
         }
         botonIniciar.setEnabled(false);
         Sesionreloj();
-        sheduleSaldos();
     }//GEN-LAST:event_botonIniciarActionPerformed
 
     private void CaptchaKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CaptchaKeyActionPerformed
@@ -958,7 +958,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_captchaSaldoMouseEntered
 
     private void captchaSaldoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_captchaSaldoMouseExited
-        captchaSaldo.setText("2Captcha: " + saldo + "$");
+        captchaSaldo.setText(captchaStr);
     }//GEN-LAST:event_captchaSaldoMouseExited
 
 //    public static void main(String args[]) {
@@ -1514,7 +1514,7 @@ timerReloj.schedule(ttReloj, 0, 1000);
                     puerto = lineaPuerto.substring(1, m - 2);
                     break;
                 } else {
-                    proxy = "0,0,0,0";
+                    proxy = "0.0.0.0";
                     puerto = "0000";
                 }
 
@@ -1529,65 +1529,47 @@ timerReloj.schedule(ttReloj, 0, 1000);
             @Override
             public void run() {
 
-                if (pause) {
-                    try {
-                        saldo = new SaloCaptchas().getCaptchaBalance();
+                try {
+                    saldo = new SaloCaptchas().getCaptchaBalance();
 
-                        System.out.println(saldo);
-                        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
-                            captchaSaldo.setText("2Captcha: " + saldo + "$");
-                            if (!saldo.equals("ERROR")) {
-                                Double saldoParse = Double.parseDouble(saldo) / 0.0029;
-                                saldoToken = (int) Math.round(saldoParse);
-                            }
+                    System.out.println(saldo);
+                    if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
+                        captchaStr = "2Captcha: " + saldo + "$";
+                        captchaSaldo.setText(captchaStr);
+                        if (!saldo.equals("ERROR")) {
+                            Double saldoParse = Double.parseDouble(saldo) / 0.0029;
+                            saldoToken = (int) Math.round(saldoParse);
                         }
-                        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("ImageTyperz")) {
-                            captchaSaldo.setText("ImgTyperz: " + saldo + "$");
+                    }
+                    if (buttonGroupCaptcha.getSelection().getActionCommand().equals("ImageTyperz")) {
+                        captchaStr = "ImgTyperz: " + saldo + "$";
+                        captchaSaldo.setText(captchaStr);
+                        if (!saldo.equals("ERROR")) {
                             Double saldoParse = Double.parseDouble(saldo) / 0.00289;
                             saldoToken = (int) Math.round(saldoParse);
                         }
-
-                        btcPriiceLabel.setText(new BtcPrice().getRetornaPrecio());
-                        //190.122.219.119:1433
-                        deleteUpdates();
-
-                        Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
-
-                        String connectionURl = "jdbc:sqlserver://localhost;"
-                                + "database=LicenceDB;"
-                                + "user=" + user + ";"
-                                + "password=" + pass + ";";
-                        Connection connection = DriverManager.getConnection(connectionURl);
-
-                    } catch (SQLException | IOException ex) {
-                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
+                    btcPriiceLabel.setText(new BtcPrice().getRetornaPrecio());
+                    
+                    deleteUpdates();
+
+                    Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
+
+                    String connectionURl = "jdbc:sqlserver://54.245.164.121:1433;"
+                            + "database=licenceDB;"
+                            + "user=" + user + ";"
+                            + "password=" + pass + ";";
+                    Connection connection = DriverManager.getConnection(connectionURl);
+
+                } catch (SQLException | IOException ex) {
+                    Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
+
             }
         ;
         };
-timerReloj.schedule(ttReloj, 1800000, 3600000);
-    }
-
-    private void captchaSaldo() {
-
-        saldo = new SaloCaptchas().getCaptchaBalance();
-        System.out.println(saldo);
-        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
-            captchaSaldo.setText("2Captcha: " + saldo + "$");
-            if (!saldo.equals("ERROR")) {
-                Double saldoParse = Double.parseDouble(saldo) / 0.0029;
-                saldoToken = (int) Math.round(saldoParse);
-            }
-        }
-        if (buttonGroupCaptcha.getSelection().getActionCommand().equals("ImageTyperz")) {
-            captchaSaldo.setText("ImgTyperz: " + saldo + "$");
-            Double saldoParse = Double.parseDouble(saldo) / 0.00289;
-            saldoToken = (int) Math.round(saldoParse);
-        }
-
-        btcPriiceLabel.setText(new BtcPrice().getRetornaPrecio());
+timerReloj.schedule(ttReloj, 1000, 900000);
     }
 
     private void properties() {
