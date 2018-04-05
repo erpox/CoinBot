@@ -1,9 +1,10 @@
 package com.freebitcoin.app.miners;
 
 import com.freebitcoin.app.control.AntiCaptchaControl;
+import com.freebitcoin.app.control.CapMonsterControl;
+import com.freebitcoin.app.control.ImageTyperzControl;
 import com.freebitcoin.app.control.Proxies;
 import com.freebitcoin.app.control.TwoCaptchaFreeBTC;
-import com.freebitcoin.app.control.NewClass;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -24,8 +25,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -58,9 +57,8 @@ public class Worker5 extends SwingWorker<Boolean, String> {
     private final ArrayList<Proxies> proxies;
     private int captchaCount = 1;
     private final ButtonGroup buttonGroupCaptcha;
-    private static boolean captcha = false;
 
-    public Worker5 (String perfil, int selector, DefaultTableModel model,
+    public Worker5(String perfil, int selector, DefaultTableModel model,
             JCheckBoxMenuItem BackGroundStatus, LocalDateTime[] nextRollArray,
             ArrayList<Integer> balanceRollArray, int[] balanceTotalArray,
             JCheckBoxMenuItem checkBonusRP, JCheckBoxMenuItem checkBonusBTC, ArrayList<Proxies> proxies, ButtonGroup buttonGroupCaptcha) throws IOException {
@@ -76,7 +74,7 @@ public class Worker5 extends SwingWorker<Boolean, String> {
         this.checkBonusBTC = checkBonusBTC;
         this.proxies = proxies;
         this.buttonGroupCaptcha = buttonGroupCaptcha;
-        this.file = new File("C:\\Program Files (x86)\\GT Tools\\geckodriver.exe");
+        this.file = new File("C:\\Program Files\\GT Tools\\geckodriver.exe");
     }
 
     @Override
@@ -88,25 +86,26 @@ public class Worker5 extends SwingWorker<Boolean, String> {
             loadSite();
             checkBonusPoint();
             checkBonusFreeBTC();
-            rollAction();
-            //freeRollPlay();
+            //rollAction();
+            freeRollPlay();
             postear();
 
             return false;
         } catch (NoSuchSessionException ex) {
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         } catch (WebDriverException ex) {
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
             model.setValueAt("Ha ocurrido un error", selector, 10);
             now = LocalDateTime.now().plusMinutes(5);
-            nextRollArray[selector]= now;
+            nextRollArray[selector] = now;
             driver.quit();
             return false;
         } catch (Exception e) {
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
             model.setValueAt("Ha ocurrido un error", selector, 10);
             now = LocalDateTime.now().plusMinutes(5);
-             nextRollArray[selector]= now;
+            nextRollArray[selector] = now;
             driver.quit();
             return false;
         }
@@ -165,7 +164,7 @@ public class Worker5 extends SwingWorker<Boolean, String> {
                 hora = LocalTime.now().plus(5, ChronoUnit.MINUTES).format(DateTimeFormatter.ofPattern("hh:mm a"));
                 now = LocalDateTime.now().plus(5, ChronoUnit.MINUTES);
             }
-             nextRollArray[selector]= now;
+            nextRollArray[selector] = now;
             try {
                 String bonu = driver.findElement(By.xpath("//div[@id='bonus_container_free_points']/p/span")).getText().substring(0, 3).trim(); //bonus de puntos
                 bonoRPFin = driver.findElement(By.id("bonus_span_free_points")).getText().substring(0, 2) + " Hrs";
@@ -367,7 +366,10 @@ public class Worker5 extends SwingWorker<Boolean, String> {
     }
 
     protected void rollAction() throws IOException, InterruptedException, NoSuchSessionException {
+
         model.setValueAt("Resolviendo Captcha... Intento " + captchaCount, selector, 10);
+        driver.findElement(By.linkText("FREE BTC")).click();
+
         if (buttonGroupCaptcha.getSelection().getActionCommand().equals("2Captcha")) {
             TwoCaptchaFreeBTC prueba = new TwoCaptchaFreeBTC(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
             responseToken = prueba.Tokenizer();
@@ -379,6 +381,14 @@ public class Worker5 extends SwingWorker<Boolean, String> {
         } else if (buttonGroupCaptcha.getSelection().getActionCommand().equals("Anti-Captcha")) {
             AntiCaptchaControl antiCaptcha = new AntiCaptchaControl(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
             responseToken = antiCaptcha.captchaProxy();
+
+        } else if (buttonGroupCaptcha.getSelection().getActionCommand().equals("ImageTyperz")) {
+            ImageTyperzControl typerz = new ImageTyperzControl(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
+            responseToken = typerz.tokenizer();
+
+        } else if (buttonGroupCaptcha.getSelection().getActionCommand().equals("CapMonster")) {
+            CapMonsterControl capMonster = new CapMonsterControl();
+            responseToken = capMonster.Tokenizer();
         }
 
         JavascriptExecutor jse = (JavascriptExecutor) driver;
@@ -460,7 +470,7 @@ public class Worker5 extends SwingWorker<Boolean, String> {
         model.setValueAt(hora, selector, 9);
 
         balanceRollArray.add(Integer.parseInt(balanceRoll));
-         nextRollArray[selector]= now;
+        nextRollArray[selector] = now;
         balanceTotalArray[selector] = (int) finall;
 
         killDriver();
@@ -490,7 +500,7 @@ public class Worker5 extends SwingWorker<Boolean, String> {
         model.setValueAt(bonoBTCFin, selector, 8);
         model.setValueAt("-", selector, 9);
         model.setValueAt("IP Baneada", selector, 10);
-         nextRollArray[selector]= now;
+        nextRollArray[selector] = now;
         driver.quit();
         driver.findElement(By.id("free_play_form_button")).click();
     }
@@ -499,46 +509,7 @@ public class Worker5 extends SwingWorker<Boolean, String> {
         driver.findElement(By.linkText("FREE BTC")).click();
         model.setValueAt("Intentando Roll gratis", selector, 10);
         try {
-            WebElement elemet = driver.findElement(By.className("g-recaptcha"));
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            js.executeScript("window.scrollTo(0, Math.max(document.documentElement."
-                    + "scrollHeight, document.body.scrollHeight, document.documentElement.clientHeight));");
-
-            Actions action = new Actions(driver);
-            action.moveToElement(elemet).build().perform();
-            Thread.sleep(1000);
-            action.click(elemet).build().perform();
-            Thread.sleep(4000);
-
-            try {
-                driver.findElement(By.linkText("Got it!")).click();
-            } catch (NoSuchElementException e) {
-                System.out.println("El banner no esta activo");
-            }
-
-            driver.findElement(By.id("free_play_form_button")).click();
-
-            try {
-                WebDriverWait wait = new WebDriverWait(driver, 5);
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(By.id("free_play_result")));
-            } catch (Exception e) {
-                driver.navigate().refresh();
-                rollAction();
-            }
-
-            postRoll = driver.findElement(By.id("winnings")).getText();
-            rewardPointRoll = driver.findElement(By.id("fp_reward_points_won")).getText();
-            int rp = Integer.parseInt(rewardPointRoll);
-            finalPuntos = finalPuntos + rp;
-            model.setValueAt("¡Roll listo!", selector, 10);
-            model.setValueAt("Esperando siguiente ronda. Roll gratis", selector, 10);
-            postear();
-
-        } catch (ElementClickInterceptedException | MoveTargetOutOfBoundsException ex) {
-            //  Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
-            driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
-            driver.switchTo().defaultContent();
+            driver.findElement(By.className("g-recaptcha"));
             rollAction();
             //  Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchElementException e) {

@@ -152,10 +152,10 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 =  jTable1 = new MiRenderer();
         relojLabel1 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         CaptchaKey = new javax.swing.JMenuItem();
-        ITCaptchaKey = new javax.swing.JMenuItem();
         antCaptchaKey = new javax.swing.JMenuItem();
         proxyAuth = new javax.swing.JMenuItem();
         activarMenu = new javax.swing.JMenu();
@@ -168,10 +168,12 @@ public class MainFrame extends javax.swing.JFrame {
         checkWorker2 = new javax.swing.JRadioButtonMenuItem();
         checkWorker3 = new javax.swing.JRadioButtonMenuItem();
         checkWorker4 = new javax.swing.JRadioButtonMenuItem();
+        checkWorker5 = new javax.swing.JRadioButtonMenuItem();
+        checkWorker6 = new javax.swing.JRadioButtonMenuItem();
+        checkWorker7 = new javax.swing.JRadioButtonMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem2 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonAntiCaptcha = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem3 = new javax.swing.JRadioButtonMenuItem();
 
         jPopupMenu1.setToolTipText("");
 
@@ -236,7 +238,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jLabel15.setText("Tu Anti-Captcha API Key");
+        jLabel15.setText("CapMonster IP");
 
         javax.swing.GroupLayout antiCaptcheKeyLayout = new javax.swing.GroupLayout(antiCaptcheKey);
         antiCaptcheKey.setLayout(antiCaptcheKeyLayout);
@@ -533,6 +535,12 @@ public class MainFrame extends javax.swing.JFrame {
         relojLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jPanel1.add(relojLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(775, 666, 40, 30));
 
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Settings_25px.png"))); // NOI18N
+        jButton1.setBorder(null);
+        jButton1.setBorderPainted(false);
+        jButton1.setContentAreaFilled(false);
+        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(5, 5, -1, -1));
+
         jMenuBar1.setBackground(new java.awt.Color(0, 120, 215));
         jMenuBar1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jMenuBar1.setForeground(null);
@@ -557,19 +565,9 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu1.add(CaptchaKey);
 
-        ITCaptchaKey.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        ITCaptchaKey.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/CAPTCHA_15px_1.png"))); // NOI18N
-        ITCaptchaKey.setText("ImageTyperz");
-        ITCaptchaKey.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ITCaptchaKeyActionPerformed(evt);
-            }
-        });
-        jMenu1.add(ITCaptchaKey);
-
         antCaptchaKey.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
         antCaptchaKey.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/CAPTCHA_15px_1.png"))); // NOI18N
-        antCaptchaKey.setText("Anti-Captcha");
+        antCaptchaKey.setText("CapMonster");
         antCaptchaKey.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 antCaptchaKeyActionPerformed(evt);
@@ -662,6 +660,33 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu2.add(checkWorker4);
 
+        buttonGroupMiners.add(checkWorker5);
+        checkWorker5.setText("5");
+        checkWorker5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkWorker5ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(checkWorker5);
+
+        buttonGroupMiners.add(checkWorker6);
+        checkWorker6.setText("6");
+        checkWorker6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkWorker6ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(checkWorker6);
+
+        buttonGroupMiners.add(checkWorker7);
+        checkWorker7.setText("7");
+        checkWorker7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkWorker7ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(checkWorker7);
+
         activarMenu.add(jMenu2);
 
         jMenu3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/CAPTCHA_15px_1.png"))); // NOI18N
@@ -679,25 +704,15 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu3.add(jRadioButtonMenuItem1);
 
-        buttonGroupCaptcha.add(jRadioButtonMenuItem2);
-        jRadioButtonMenuItem2.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        jRadioButtonMenuItem2.setText("ImageTyperz");
-        jRadioButtonMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroupCaptcha.add(jRadioButtonMenuItem3);
+        jRadioButtonMenuItem3.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
+        jRadioButtonMenuItem3.setText("CapMonster");
+        jRadioButtonMenuItem3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem2ActionPerformed(evt);
+                jRadioButtonMenuItem3ActionPerformed(evt);
             }
         });
-        jMenu3.add(jRadioButtonMenuItem2);
-
-        buttonGroupCaptcha.add(jRadioButtonAntiCaptcha);
-        jRadioButtonAntiCaptcha.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        jRadioButtonAntiCaptcha.setText("Anti-Captcha");
-        jRadioButtonAntiCaptcha.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonAntiCaptchaActionPerformed(evt);
-            }
-        });
-        jMenu3.add(jRadioButtonAntiCaptcha);
+        jMenu3.add(jRadioButtonMenuItem3);
 
         activarMenu.add(jMenu3);
 
@@ -748,6 +763,27 @@ public class MainFrame extends javax.swing.JFrame {
                 runWorker2();
                 runWorker3();
                 runWorker4();
+            } else if (checkWorker5.isSelected()) {
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                runWorker5();
+            } else if (checkWorker6.isSelected()) {
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                runWorker5();
+                runWorker6();
+            } else if (checkWorker7.isSelected()) {
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                runWorker5();
+                runWorker6();
+                runWorker7();
             }
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -894,28 +930,6 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_proxyAuthActionPerformed
 
-    private void ITCaptchaKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ITCaptchaKeyActionPerformed
-        int i = JOptionPane.showConfirmDialog(rootPane, imageTyper, "ImageTyperz Credenciales", 2);
-        if (i == 0) {
-            try {
-                PROP.setProperty("imageTyperzKey", imageUser.getText());
-                PROP.store(new FileWriter(PROP_PATH), "CoinBot");
-            } catch (IOException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }//GEN-LAST:event_ITCaptchaKeyActionPerformed
-
-    private void jRadioButtonMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem2ActionPerformed
-        try {
-            jRadioButtonMenuItem1.setActionCommand("ImageTyperz");
-            PROP.setProperty("activeCaptcha", "2");
-            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_jRadioButtonMenuItem2ActionPerformed
-
     private void jMenu1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu1ActionPerformed
 
     }//GEN-LAST:event_jMenu1ActionPerformed
@@ -929,16 +943,6 @@ public class MainFrame extends javax.swing.JFrame {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jRadioButtonMenuItem1ActionPerformed
-
-    private void jRadioButtonAntiCaptchaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonAntiCaptchaActionPerformed
-        try {
-            jRadioButtonAntiCaptcha.setActionCommand("Anti-Captcha");
-            PROP.setProperty("activeCaptcha", "3");
-            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_jRadioButtonAntiCaptchaActionPerformed
 
     private void antCaptchaKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_antCaptchaKeyActionPerformed
 
@@ -960,6 +964,40 @@ public class MainFrame extends javax.swing.JFrame {
     private void captchaSaldoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_captchaSaldoMouseExited
         captchaSaldo.setText(captchaStr);
     }//GEN-LAST:event_captchaSaldoMouseExited
+
+    private void jRadioButtonMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem3ActionPerformed
+        jRadioButtonMenuItem3.setActionCommand("CapMonster");
+    }//GEN-LAST:event_jRadioButtonMenuItem3ActionPerformed
+
+    private void checkWorker5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkWorker5ActionPerformed
+        try {
+            acticeWorlerLabel1.setText("5");
+            PROP.setProperty("activeWorkers", "5");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_checkWorker5ActionPerformed
+
+    private void checkWorker6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkWorker6ActionPerformed
+        try {
+            acticeWorlerLabel1.setText("6");
+            PROP.setProperty("activeWorkers", "6");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_checkWorker6ActionPerformed
+
+    private void checkWorker7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkWorker7ActionPerformed
+        try {
+            acticeWorlerLabel1.setText("7");
+            PROP.setProperty("activeWorkers", "7");
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_checkWorker7ActionPerformed
 
 //    public static void main(String args[]) {
 //
@@ -988,7 +1026,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton BotonResume;
     private javax.swing.JMenuItem CaptchaKey;
     public javax.swing.JLabel EstadoInfo;
-    private javax.swing.JMenuItem ITCaptchaKey;
     private javax.swing.JLabel LogoLabel;
     private javax.swing.JLabel acticeWorlerLabel1;
     private javax.swing.JMenu activarMenu;
@@ -1008,8 +1045,12 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem checkWorker2;
     private javax.swing.JRadioButtonMenuItem checkWorker3;
     private javax.swing.JRadioButtonMenuItem checkWorker4;
+    private javax.swing.JRadioButtonMenuItem checkWorker5;
+    private javax.swing.JRadioButtonMenuItem checkWorker6;
+    private javax.swing.JRadioButtonMenuItem checkWorker7;
     private javax.swing.JPanel imageTyper;
     private javax.swing.JTextField imageUser;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel15;
@@ -1023,9 +1064,8 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JPopupMenu jPopupMenu1;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonAntiCaptcha;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem3;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private org.jdesktop.swingx.JXTable jTable1;
@@ -1551,7 +1591,7 @@ timerReloj.schedule(ttReloj, 0, 1000);
                     }
 
                     btcPriiceLabel.setText(new BtcPrice().getRetornaPrecio());
-                    
+
                     deleteUpdates();
 
                     Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
@@ -1633,13 +1673,9 @@ timerReloj.schedule(ttReloj, 1000, 900000);
                     jRadioButtonMenuItem1.setSelected(true);
                     jRadioButtonMenuItem1.setActionCommand("2Captcha");
                     break;
-                case "2":
-                    jRadioButtonMenuItem2.setSelected(true);
-                    jRadioButtonMenuItem2.setActionCommand("ImageTyperz");
-                    break;
                 case "3":
-                    jRadioButtonAntiCaptcha.setSelected(true);
-                    jRadioButtonAntiCaptcha.setActionCommand("Anti-Captcha");
+                    // jRadioButtonAntiCaptcha.setSelected(true);
+                    // jRadioButtonAntiCaptcha.setActionCommand("Anti-Captcha");
                     break;
             }
 

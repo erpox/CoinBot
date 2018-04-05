@@ -1,6 +1,7 @@
 package com.freebitcoin.app.miners;
 
 import com.freebitcoin.app.control.AntiCaptchaControl;
+import com.freebitcoin.app.control.CapMonsterControl;
 import com.freebitcoin.app.control.ImageTyperzControl;
 import com.freebitcoin.app.control.Proxies;
 import com.freebitcoin.app.control.TwoCaptchaFreeBTC;
@@ -87,12 +88,13 @@ public class Worker extends SwingWorker<Boolean, String> {
             loadSite();
             checkBonusPoint();
             checkBonusFreeBTC();
-            rollAction();
-            //freeRollPlay();
+            //rollAction();
+            freeRollPlay();
             postear();
 
             return false;
         } catch (NoSuchSessionException ex) {
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         } catch (WebDriverException ex) {
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
@@ -119,7 +121,7 @@ public class Worker extends SwingWorker<Boolean, String> {
         model.setValueAt("Cargando perfil... ", selector, 10);
         System.setProperty("webdriver.gecko.driver", file.getAbsolutePath());
         System.setProperty("webdriver.firefox.bin", "C:\\Program Files\\Mozilla Firefox\\firefox.exe");
-        // System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
+        System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
         ProfilesIni profile = new ProfilesIni();
         FirefoxProfile myprofile = profile.getProfile(Perfil);
 
@@ -366,6 +368,7 @@ public class Worker extends SwingWorker<Boolean, String> {
     }
 
     protected void rollAction() throws IOException, InterruptedException, NoSuchSessionException {
+
         model.setValueAt("Resolviendo Captcha... Intento " + captchaCount, selector, 10);
         driver.findElement(By.linkText("FREE BTC")).click();
 
@@ -376,6 +379,7 @@ public class Worker extends SwingWorker<Boolean, String> {
                 model.setValueAt("2Captcha API Key invalido", selector, 10);
                 killDriver();
             }
+
         } else if (buttonGroupCaptcha.getSelection().getActionCommand().equals("Anti-Captcha")) {
             AntiCaptchaControl antiCaptcha = new AntiCaptchaControl(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
             responseToken = antiCaptcha.captchaProxy();
@@ -383,6 +387,10 @@ public class Worker extends SwingWorker<Boolean, String> {
         } else if (buttonGroupCaptcha.getSelection().getActionCommand().equals("ImageTyperz")) {
             ImageTyperzControl typerz = new ImageTyperzControl(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
             responseToken = typerz.tokenizer();
+
+        } else if (buttonGroupCaptcha.getSelection().getActionCommand().equals("CapMonster")) {
+            CapMonsterControl capMonster = new CapMonsterControl();
+            responseToken = capMonster.Tokenizer();
         }
 
         JavascriptExecutor jse = (JavascriptExecutor) driver;
@@ -503,46 +511,7 @@ public class Worker extends SwingWorker<Boolean, String> {
         driver.findElement(By.linkText("FREE BTC")).click();
         model.setValueAt("Intentando Roll gratis", selector, 10);
         try {
-            WebElement elemet = driver.findElement(By.className("g-recaptcha"));
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            js.executeScript("window.scrollTo(0, Math.max(document.documentElement."
-                    + "scrollHeight, document.body.scrollHeight, document.documentElement.clientHeight));");
-
-            Actions action = new Actions(driver);
-            action.moveToElement(elemet).build().perform();
-            Thread.sleep(1000);
-            action.click(elemet).build().perform();
-            Thread.sleep(4000);
-
-            try {
-                driver.findElement(By.linkText("Got it!")).click();
-            } catch (NoSuchElementException e) {
-                System.out.println("El banner no esta activo");
-            }
-
-            driver.findElement(By.id("free_play_form_button")).click();
-
-            try {
-                WebDriverWait wait = new WebDriverWait(driver, 5);
-                wait.until(
-                        ExpectedConditions.visibilityOfElementLocated(By.id("free_play_result")));
-            } catch (Exception e) {
-                driver.navigate().refresh();
-                rollAction();
-            }
-
-            postRoll = driver.findElement(By.id("winnings")).getText();
-            rewardPointRoll = driver.findElement(By.id("fp_reward_points_won")).getText();
-            int rp = Integer.parseInt(rewardPointRoll);
-            finalPuntos = finalPuntos + rp;
-            model.setValueAt("¡Roll listo!", selector, 10);
-            model.setValueAt("Esperando siguiente ronda. Roll gratis", selector, 10);
-            postear();
-
-        } catch (ElementClickInterceptedException | MoveTargetOutOfBoundsException ex) {
-            //  Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
-            driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
-            driver.switchTo().defaultContent();
+            driver.findElement(By.className("g-recaptcha"));
             rollAction();
             //  Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchElementException e) {

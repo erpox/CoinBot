@@ -44,19 +44,18 @@ public class TwoCaptchaFreeBTC {
 
     public String Tokenizer() {
 
-        if (proxyUser.equals("") && proxyPass.equals("")) {
-            service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, ProxyType.HTTP);
+       if (proxyUser.equals("") && proxyPass.equals("")) {
+           service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, ProxyType.HTTP);
             System.out.println("usando proxy sin auth");
         } else if (proxy.contains("0,0,0,0")) {
             System.out.println("sin proxy");
             service = new TwoCaptchaService(apiKey, googleKey, pageUrl);
-        } else {
+       } else {
             System.out.println("usnado proxy con auth");
             service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, proxyUser, proxyPass, ProxyType.HTTP);
         }
-
-        System.out.println("usando: " + proxy + ":" + puerto + " usuario: " + proxyUser + " clave: " + proxyPass);
         try {
+            
             responseToken = service.solveCaptcha();
             System.out.println("The response token is: " + responseToken);
             return responseToken;
@@ -75,6 +74,5 @@ public class TwoCaptchaFreeBTC {
             return responseToken;
         }
     }
-
 }
 
