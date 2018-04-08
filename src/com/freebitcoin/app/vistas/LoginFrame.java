@@ -28,10 +28,12 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
             + "\\AppData\\Roaming\\GT Tools\\config.properties";
 
     public LoginFrame(String[] systemInfo) {
+        laf();
         initComponents();
         jLabel8.setVisible(false);
         this.systemInfo = systemInfo;
         proper();
+
     }
 
     @Override
@@ -56,7 +58,6 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jLabel6 = new javax.swing.JLabel();
         jCheckBox1 = new javax.swing.JCheckBox();
         jButton2 = new javax.swing.JButton();
-        jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jPasswordField1 = new javax.swing.JPasswordField();
@@ -112,7 +113,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jLabel4.setForeground(new java.awt.Color(51, 102, 255));
         jLabel4.setText("¿Has olvidado tu contraseña?");
         jLabel4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(88, 360, -1, -1));
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(103, 360, -1, -1));
 
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_User_25px.png"))); // NOI18N
         jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(61, 90, -1, 30));
@@ -142,10 +143,6 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
             }
         });
         jPanel2.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(316, 0, -1, -1));
-
-        jLabel7.setForeground(new java.awt.Color(240, 240, 240));
-        jLabel7.setText("jLabel7");
-        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(147, 285, -1, -1));
 
         jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/7YQl.gif"))); // NOI18N
         jPanel2.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 245, -1, -1));
@@ -202,7 +199,6 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
@@ -212,7 +208,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
- 
+
     private boolean dbConnection() {
         try {
             String connectionURl = "jdbc:sqlserver://54.245.164.121:1433;;"
@@ -228,15 +224,15 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
                 jLabel8.setVisible(false);
                 JOptionPane.showMessageDialog(this, "No se pudo conectar con el servidor", "Error de conexion", JOptionPane.ERROR_MESSAGE);
                 jButton1.setEnabled(true);
-                
-            } else if (e.getMessage().contains("Error de inicio de sesión ") 
+
+            } else if (e.getMessage().contains("Error de inicio de sesión ")
                     || e.getMessage().contains("Login failed for user")) {
                 jLabel9.setText("");
                 jLabel8.setVisible(false);
                 JOptionPane.showMessageDialog(this, "Usuario o clave invalida", "Error de inicio de sesion", JOptionPane.ERROR_MESSAGE);
                 jButton1.setEnabled(true);
-                
-            } else if (e.getMessage().contains("ejecución del desencadenador") 
+
+            } else if (e.getMessage().contains("ejecución del desencadenador")
                     || e.getMessage().contains("trigger execution")) {
                 jLabel9.setText("");
                 jLabel8.setVisible(false);
@@ -276,11 +272,36 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jButton1.setEnabled(false);
         if (dbConnection()) {
             try {
-                new MainFrame(user, password).setVisible(true);
+                //            resulSetLicencia();
+//            for (int i = 0; i < 5; i++) {
+//                if (systemInfo[i].equals(systemInfoDB[i])) {
+//                    f++;
+//                }
+//            }
+//            if (f == 5) {
+//                try {
+//                    jLabel9.setText("");
+//                    jLabel8.setVisible(false);
+//                    JOptionPane.showMessageDialog(rootPane, "Has iniciado sesión", "Let's Make Money", 1);
+//
+//                    new MainFrame(user,password).setVisible(true);
+//                    this.dispose();
+//                } catch (IOException ex) {
+//                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            } else {
+//                jLabel9.setText("");
+//                jLabel8.setVisible(false);
+//                JOptionPane.showMessageDialog(rootPane, "Este equipo no esta "
+//                        + "autorizado para el uso de este programa", "Error de activacion", JOptionPane.ERROR_MESSAGE);
+//
+//                System.exit(0);
+//            }
+              new MainFrame(user, password).setVisible(true);
+              
             } catch (IOException ex) {
                 Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
-            this.dispose();
         }
     }
 
@@ -293,6 +314,19 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
             Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public final void laf() {
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Windows".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(ConfigFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
 }

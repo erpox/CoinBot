@@ -4,9 +4,10 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/src/com/freebitcoin/app/vistas/MainFrame.java</file>
-            <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/src/com/freebitcoin/app/miners/Worker.java</file>
-            <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/src/com/freebitcoin/app/control/TwoCaptchaFreeBTC.java</file>
-            <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/src/com/freebitcoin/app/control/CapMonsterControl.java</file>
+            <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/src/com/freebitcoin/app/vistas/ConfigFrame.java</file>
+            <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/src/com/freebitcoin/app/vistas/LoginFrame.java</file>
+            <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/src/com/freebitcoin/app/control/Activacion.java</file>
+            <file>file:/D:/Documents/NetBeansProjects/CoinBotApp/CoinBot/manifest.mf</file>
         </group>
     </open-files>
 </project-private>

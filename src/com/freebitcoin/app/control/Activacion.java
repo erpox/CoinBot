@@ -24,7 +24,6 @@ public class Activacion {
             Scanner sc = new Scanner(processCpuID.getInputStream());
             sc.next();
             cpuIDsN = sc.next();
-            System.out.println(cpuIDsN);
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
         }

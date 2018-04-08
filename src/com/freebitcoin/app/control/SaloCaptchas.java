@@ -1,8 +1,5 @@
 package com.freebitcoin.app.control;
 
-import com.anti_captcha.Api.ImageToText;
-import com.anti_captcha.Helper.DebugHelper;
-import com.imagetyperzapi.ImageTyperzAPI;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,12 +27,8 @@ public class SaloCaptchas {
             activeCaptch2 = prop.getProperty("activeCaptcha");
 
             switch (activeCaptch2) {
-                case "1":
+                case "0":
                     return twoCaptcha();
-                case "2":
-                    return imageTyperz();
-                case "3":
-                    return antiCaptcha();
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(SaloCaptchas.class.getName()).log(Level.SEVERE, null, ex);
@@ -74,36 +67,5 @@ public class SaloCaptchas {
                             .getName()).log(Level.SEVERE, null, ex);
         }
         return saldo = "ERROR";
-    }
-
-    private String antiCaptcha() {
-        DebugHelper.setVerboseMode(true);
-
-        ImageToText api = new ImageToText();
-        Double balance = api.getBalance();
-        api.setClientKey("52b7a916db13dca2ade86c4ed668bddc");
-
-        if (balance == null) {
-            DebugHelper.out("GetBalance() failed. " + api.getErrorMessage(), DebugHelper.Type.ERROR);
-            return null;
-        } else {
-            System.out.println(balance);
-            return String.valueOf(balance);
-        }
-    }
-
-    private String imageTyperz() {
-        String balance;
-        try {
-            String apiKey = prop.getProperty("imageTyperzKey");
-            ImageTyperzAPI typerz = new ImageTyperzAPI(apiKey);
-            balance = typerz.account_balance();
-
-            return balance;
-
-        } catch (Exception ex) {
-            Logger.getLogger(SaloCaptchas.class.getName()).log(Level.SEVERE, null, ex);
-            return balance = "ERROR";
-        }
     }
 }
