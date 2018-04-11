@@ -50,7 +50,8 @@ public class Activacion {
             Scanner sc = new Scanner(processBIOS.getInputStream());
             sc.next();
             biosIDsN = sc.next();
-
+        }catch (NoSuchElementException ex) {
+                motherIDsN = "No hay serial BIOS";            
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
         }

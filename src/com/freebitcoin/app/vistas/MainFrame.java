@@ -10,6 +10,7 @@ import com.freebitcoin.app.miners.Worker6;
 import com.freebitcoin.app.miners.Worker7;
 import com.freebitcoin.app.control.Proxies;
 import com.freebitcoin.app.miners.Worker8;
+import com.freebitcoin.app.vistas.TableColumnManager;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -56,8 +57,7 @@ public class MainFrame extends javax.swing.JFrame {
             w8 = 0;
 
     private int dia = 0;
-    private int procesando = 0,
-            terminadas = 0;
+    private int procesando = 0;
     private Timer timer;
     private File ficheroPerfil2;
     private final DefaultTableModel model;
@@ -84,19 +84,19 @@ public class MainFrame extends javax.swing.JFrame {
     private LocalTime reloj = LocalTime.of(00, 00, 00);
     private final ArrayList<String> proxyRuta = new ArrayList<>();
     private final ArrayList<Proxies> proxies = new ArrayList<>();
+    private int[] terminada;
     private final Properties PROP = new Properties();
     private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
             + "\\AppData\\Roaming\\GT Tools\\config.properties";
-    private int saldoToken;
-    private String saldo;
     private final String user;
     private final String pass;
-    private String captchaStr;
     private boolean checkBonusRP,
             checkBonusBTC,
             backGroundStatus,
             openPopUp = false;
-    private int workerStatus;
+    private int workerStatus,
+            terminadas = 0,
+            terminadaCheck = 0;
     private String activeCaptchastatus;
     private String btcPriceStr;
 
@@ -112,13 +112,8 @@ public class MainFrame extends javax.swing.JFrame {
         sheduleSaldos();
         this.user = user;
         this.pass = pass;
-        Icon listicon = new ImageIcon(getClass().getClassLoader().getResource("Vistas/icons8_Numeric_25px.png"));
-        JLabel iconLabel = new JLabel(listicon);
-        TableCellRenderer renderer = new JComponentTableCellRenderer();
-        TableColumnModel col = jTable1.getColumnModel();
-        TableColumn col0 = col.getColumn(0);
-        col0.setHeaderValue(iconLabel);
-        col0.setHeaderRenderer(renderer);
+        //TableColumnManager tcm=TableColumnManager(jTable1);
+        //tcm.hideColumn("E");
     }
 
     @Override
@@ -160,9 +155,11 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
 
         jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Firefox_15px.png"))); // NOI18N
-        jMenuItem1.setText("Abir perfil");
+        jMenuItem1.setText("Abrir perfil");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem1ActionPerformed(evt);
@@ -170,10 +167,15 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jPopupMenu1.add(jMenuItem1);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("CoinBot v1.0");
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setTitle("CoinBot v1.2.2");
         setIconImage(getIconImage());
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jPanel1.setBackground(new java.awt.Color(0, 120, 215));
         jPanel1.setForeground(new java.awt.Color(255, 255, 255));
@@ -266,7 +268,7 @@ public class MainFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "#","Perfil", "Balance", "Puntos", "<html><center>Roll<br>BTC</center></html>", "<html><center>Roll<br>Puntos</center></html>", "<html><center>Bono<br>RP</center></html>",
+                "#","Perfil", "Balance", "Puntos", "<html><center>Roll<br>BTC</center></html>", "<html><center>Roll<br>Puntos</center></html>","Porcentaje", "<html><center>Bono<br>RP</center></html>",
                 "<html><center>Bono RP<br>FIN</center></html>","<html><center>Bono<br>BTC</center></html>","<html><center>Bono BTC<br>FIN</center></html>", "<html><center>Prox.<br>Roll</center></html>", "Estado"
             }
         ) {
@@ -294,11 +296,13 @@ public class MainFrame extends javax.swing.JFrame {
 
                 , java.lang.Object.class
 
+                , java.lang.Object.class
+
                 , java.lang.String.class
 
             };
             boolean[] canEdit = new boolean [] {
-                false,false, false, false, false, false, false, false, false, false, false, false
+                false,false, false, false, false, false, false,false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -327,6 +331,7 @@ public class MainFrame extends javax.swing.JFrame {
         jTable1.getColumnModel().getColumn(7).setCellRenderer( centerRenderer );
         jTable1.getColumnModel().getColumn(8).setCellRenderer( centerRenderer );
         jTable1.getColumnModel().getColumn(9).setCellRenderer( centerRenderer );
+        jTable1.getColumnModel().getColumn(10).setCellRenderer( centerRenderer );
         TableColumnModel columnModel=jTable1.getColumnModel();
 
         columnModel.getColumn(0).setMinWidth(1);
@@ -337,12 +342,13 @@ public class MainFrame extends javax.swing.JFrame {
         columnModel.getColumn(3).setPreferredWidth(25);
         columnModel.getColumn(4).setPreferredWidth(20);
         columnModel.getColumn(5).setPreferredWidth(20);
-        columnModel.getColumn(6).setPreferredWidth(25);
-        columnModel.getColumn(7).setPreferredWidth(35);
-        columnModel.getColumn(8).setPreferredWidth(30);
-        columnModel.getColumn(9).setPreferredWidth(35);
+        columnModel.getColumn(5).setPreferredWidth(30);
+        columnModel.getColumn(7).setPreferredWidth(25);
+        columnModel.getColumn(8).setPreferredWidth(35);
+        columnModel.getColumn(9).setPreferredWidth(30);
         columnModel.getColumn(10).setPreferredWidth(35);
-        columnModel.getColumn(11).setPreferredWidth(230);
+        columnModel.getColumn(11).setPreferredWidth(35);
+        columnModel.getColumn(12).setPreferredWidth(230);
         jTable1.setComponentPopupMenu(jPopupMenu1);
         jTable1.setFont(new java.awt.Font("Microsoft JhengHei", 1, 13)); // NOI18N
         jTable1.setGridColor(new java.awt.Color(102, 102, 102));
@@ -378,7 +384,7 @@ public class MainFrame extends javax.swing.JFrame {
         totalPerfilesLabel.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         totalPerfilesLabel.setForeground(new java.awt.Color(255, 255, 255));
         totalPerfilesLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Firefox_20px.png"))); // NOI18N
-        totalPerfilesLabel.setText("Total: 154 ");
+        totalPerfilesLabel.setText("Total: 0");
         jPanel2.add(totalPerfilesLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(64, 7, -1, -1));
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 20)); // NOI18N
@@ -400,7 +406,7 @@ public class MainFrame extends javax.swing.JFrame {
         procesandoLabel.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         procesandoLabel.setForeground(new java.awt.Color(255, 255, 255));
         procesandoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Spinner_20px.png"))); // NOI18N
-        procesandoLabel.setText("Procesando: 6");
+        procesandoLabel.setText("Procesando: 0");
         jPanel2.add(procesandoLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 7, 120, -1));
 
         jLabel9.setFont(new java.awt.Font("Tahoma", 1, 20)); // NOI18N
@@ -411,7 +417,7 @@ public class MainFrame extends javax.swing.JFrame {
         esperaLabel.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         esperaLabel.setForeground(new java.awt.Color(255, 255, 255));
         esperaLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Cafe_20px.png"))); // NOI18N
-        esperaLabel.setText("En Espera: 120");
+        esperaLabel.setText("En Espera: 0");
         jPanel2.add(esperaLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(425, 7, 110, -1));
 
         jLabel11.setFont(new java.awt.Font("Tahoma", 1, 20)); // NOI18N
@@ -458,10 +464,25 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel6.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Bitcoin_20px.png"))); // NOI18N
-        jLabel6.setText("1 BTC ~ 6852.1 $");
+        jLabel6.setText("1 BTC ~ 0 $");
         jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 7, 130, -1));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 656, 878, 33));
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable2);
+
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 100, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -513,68 +534,62 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void botonIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonIniciarActionPerformed
         properties();
-
-        try {
-            switch (workerStatus) {
-                case 1:
-                    runWorker1();
-                    break;
-                case 2:
-                    runWorker1();
-                    runWorker2();
-                    break;
-                case 3:
-                    runWorker1();
-                    runWorker2();
-                    runWorker3();
-                    break;
-                case 4:
-                    runWorker1();
-                    runWorker2();
-                    runWorker3();
-                    runWorker4();
-                    break;
-                case 5:
-                    runWorker1();
-                    runWorker2();
-                    runWorker3();
-                    runWorker4();
-                    runWorker5();
-                    break;
-                case 6:
-                    runWorker1();
-                    runWorker2();
-                    runWorker3();
-                    runWorker4();
-                    runWorker5();
-                    runWorker6();
-                    break;
-                case 7:
-                    runWorker1();
-                    runWorker2();
-                    runWorker3();
-                    runWorker4();
-                    runWorker5();
-                    runWorker6();
-                    runWorker7();
-                    break;
-                case 8:
-                    runWorker1();
-                    runWorker2();
-                    runWorker3();
-                    runWorker4();
-                    runWorker5();
-                    runWorker6();
-                    runWorker7();
-                    runWorker8();
-            }
-
-            Thread.sleep(1000);
-        } catch (IOException | InterruptedException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        switch (workerStatus) {
+            case 1:
+                runWorker1();
+                break;
+            case 2:
+                runWorker1();
+                runWorker2();
+                break;
+            case 3:
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                break;
+            case 4:
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                break;
+            case 5:
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                runWorker5();
+                break;
+            case 6:
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                runWorker5();
+                runWorker6();
+                break;
+            case 7:
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                runWorker5();
+                runWorker6();
+                runWorker7();
+                break;
+            case 8:
+                runWorker1();
+                runWorker2();
+                runWorker3();
+                runWorker4();
+                runWorker5();
+                runWorker6();
+                runWorker7();
+                runWorker8();
         }
 
         Sesionreloj();
+        statusBar();
         botonBorrarPerfil.setEnabled(false);
         botonIniciar.setEnabled(false);
     }//GEN-LAST:event_botonIniciarActionPerformed
@@ -593,6 +608,28 @@ public class MainFrame extends javax.swing.JFrame {
         }
         nextRollArray[model.getRowCount()] = LocalDateTime.of(2020, Month.MARCH, 5, 6, 5);
     }//GEN-LAST:event_botonBorrarPerfilActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        int n = JOptionPane.showOptionDialog(rootPane,
+                "¿Esta seguro que desea cerrar el programa?",
+                "Cerrar sesión",
+                JOptionPane.CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new Object[]{"Minimizar", "Cerrar"},
+                "minimizar");
+        if (n == 0) {
+            setState(MainFrame.ICONIFIED);
+        } else {
+            try {
+                Runtime.getRuntime().exec("taskkill /F /IM geckodriver.exe");
+                Runtime.getRuntime().exec("taskkill /F /IM firefox.exe");
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            System.exit(0);
+        }
+    }//GEN-LAST:event_formWindowClosing
 
 //    public static void main(String args[]) {
 //
@@ -639,8 +676,10 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private org.jdesktop.swingx.JXTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JLabel labelBalancetotal;
     private javax.swing.JLabel labelSesion1;
     private javax.swing.JLabel procesandoLabel;
@@ -666,469 +705,6 @@ public class MainFrame extends javax.swing.JFrame {
         labelBalancetotal.setText("Balance: " + String.valueOf(sumatoriaBalance) + " Sat ~ $ " + String.format("%.2f", balanceUSD));
     }
 
-    private void runWorker1() throws FileNotFoundException, IOException {
-        timer = new Timer();
-        TimerTask tt = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-
-                    for (int x = 0; x < model.getRowCount(); x++) {
-                        if (nextRollArray[x].isBefore(nextRollArray[x + 1])
-                                || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[x])) {
-                                String estado = (String) jTable1.getValueAt(x, 11);
-
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w1 = x;
-                                    semaforoWorker1 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker1 = false;
-                        }
-                    }
-                    if (semaforoWorker1) {
-                        try {
-                            semaforoWorker1 = false;
-                            String perfil = (String) jTable1.getValueAt(w1, 1);
-                            nextRollArray[w1] = LocalDateTime.now().plusMinutes(15);
-                            worker = new Worker(perfil, w1, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            procesando++;
-                            worker.execute();
-                            Rectangle cellRect = jTable1.getCellRect(w1, 1, true);
-                            jTable1.scrollRectToVisible(cellRect);
-                            semaforoWorker1 = worker.get();
-                            if (nextRollArray[w1].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        }
-
-    ;
-    timer.schedule(tt,
-                1000, 1000);
-    }
-
-    private void runWorker2() {
-        Timer timerTask = new Timer();
-        TimerTask ttWorker2 = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-                    for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
-                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
-                                String estado = (String) jTable1.getValueAt(c, 11);
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w2 = c;
-                                    semaforoWorker2 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker2 = false;
-                        }
-                    }
-                    if (semaforoWorker2) {
-                        try {
-
-                            semaforoWorker2 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w2, 1);
-                            nextRollArray[w2] = LocalDateTime.now().plusMinutes(15);
-                            worker2 = new Worker2(perfil2, w2, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            Rectangle cellRect = jTable1.getCellRect(w2, 1, true);
-                            jTable1.scrollRectToVisible(cellRect);
-                            procesando++;
-                            worker2.execute();
-
-                            semaforoWorker2 = worker2.get();
-
-                            if (nextRollArray[w2].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        };
-            timerTask.schedule(ttWorker2,
-                1500, 1000);
-    }
-
-    private void runWorker3() {
-        Timer timerTaskWorker3 = new Timer();
-        TimerTask ttWorker3 = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-                    for (int q = 0; q < model.getRowCount(); q++) {
-                        if (nextRollArray[q].isBefore(nextRollArray[q + 1])
-                                || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[q])) {
-                                String estado = (String) jTable1.getValueAt(q, 11);
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w3 = q;
-                                    semaforoWorker3 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker3 = false;
-                        }
-                    }
-                    if (semaforoWorker3) {
-                        try {
-
-                            semaforoWorker3 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w3, 1);
-                            nextRollArray[w3] = LocalDateTime.now().plusMinutes(15);
-                            worker3 = new Worker3(perfil2, w3, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            Rectangle cellRect = jTable1.getCellRect(w3, 1, true);
-                            jTable1.scrollRectToVisible(cellRect);
-                            procesando++;
-                            worker3.execute();
-
-                            semaforoWorker3 = worker3.get();
-
-                            if (nextRollArray[w3].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        };
-timerTaskWorker3.schedule(ttWorker3, 2000, 1000);
-    }
-
-    private void runWorker4() {
-        Timer timerTaskWorker4 = new Timer();
-        TimerTask ttWorker4 = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-                    for (int q = 0; q < model.getRowCount(); q++) {
-                        if (nextRollArray[q].isBefore(nextRollArray[q + 1])
-                                || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[q])) {
-                                String estado = (String) jTable1.getValueAt(q, 11);
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w4 = q;
-                                    semaforoWorker4 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker4 = false;
-                        }
-                    }
-                    if (semaforoWorker4) {
-                        try {
-                            semaforoWorker4 = false;
-                            String perfil4 = (String) jTable1.getValueAt(w4, 1);
-                            nextRollArray[w4] = LocalDateTime.now().plusMinutes(15);
-                            worker4 = new Worker4(perfil4, w4, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            Rectangle cellRect = jTable1.getCellRect(w4, 1, true);
-                            jTable1.scrollRectToVisible(cellRect);
-                            procesando++;
-                            worker4.execute();
-
-                            semaforoWorker4 = worker4.get();
-
-                            if (nextRollArray[w4].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        };
-timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
-    }
-
-    private void runWorker5() {
-        Timer timerTask = new Timer();
-        TimerTask ttWorker5 = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-                    for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
-                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
-                                String estado = (String) jTable1.getValueAt(c, 11);
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w5 = c;
-                                    semaforoWorker5 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker5 = false;
-                        }
-                    }
-                    if (semaforoWorker5) {
-                        try {
-
-                            semaforoWorker5 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w5, 1);
-                            nextRollArray[w5] = LocalDateTime.now().plusMinutes(15);
-                            worker5 = new Worker5(perfil2, w5, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            procesando++;
-                            worker5.execute();
-
-                            semaforoWorker5 = worker5.get();
-
-                            if (nextRollArray[w5].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        };
-            timerTask.schedule(ttWorker5,
-                3000, 1000);
-    }
-
-    private void runWorker6() {
-        Timer timerTask = new Timer();
-        TimerTask ttWorker6 = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-                    for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
-                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
-                                String estado = (String) jTable1.getValueAt(c, 11);
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w6 = c;
-                                    semaforoWorker6 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker6 = false;
-                        }
-                    }
-                    if (semaforoWorker6) {
-                        try {
-                            semaforoWorker6 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w6, 1);
-                            nextRollArray[w6] = LocalDateTime.now().plusMinutes(15);
-                            worker6 = new Worker6(perfil2, w6, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            procesando++;
-                            worker6.execute();
-
-                            semaforoWorker6 = worker6.get();
-
-                            if (nextRollArray[w6].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        };
-            timerTask.schedule(ttWorker6,
-                3500, 1000);
-    }
-
-    private void runWorker7() {
-        Timer timerTask = new Timer();
-        TimerTask ttWorker7 = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-                    for (int c = 0; c < model.getRowCount(); c++) {
-                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
-                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
-                                String estado = (String) jTable1.getValueAt(c, 11);
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w7 = c;
-                                    semaforoWorker7 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker7 = false;
-                        }
-                    }
-                    if (semaforoWorker7) {
-                        try {
-                            semaforoWorker7 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w7, 1);
-                            nextRollArray[w7] = LocalDateTime.now().plusMinutes(15);
-                            worker7 = new Worker7(perfil2, w7, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            procesando++;
-                            worker7.execute();
-                            semaforoWorker7 = worker7.get();
-
-                            if (nextRollArray[w7].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        };
-            timerTask.schedule(ttWorker7,
-                4000, 1000);
-    }
-
-    private void runWorker8() throws FileNotFoundException, IOException {
-        timer = new Timer();
-        TimerTask tt = new TimerTask() {
-            @Override
-            public void run() {
-                if (pause) {
-
-                    for (int x = 0; x < model.getRowCount(); x++) {
-                        if (nextRollArray[x].isBefore(nextRollArray[x + 1])
-                                || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
-
-                            if (LocalDateTime.now().isAfter(nextRollArray[x])) {
-                                String estado = (String) jTable1.getValueAt(x, 11);
-
-                                if (estado.contains("Esperando siguiente ronda")
-                                        || estado.equals("¡Aun no es la hora del Roll!")
-                                        || estado.equals("")
-                                        || estado.equals("Ha ocurrido un error")
-                                        || estado.equals("CAPTCHA_TIMEOUT")) {
-
-                                    w8 = x;
-                                    semaforoWorker8 = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            semaforoWorker8 = false;
-                        }
-                    }
-                    if (semaforoWorker8) {
-                        try {
-                            semaforoWorker8 = false;
-                            String perfil = (String) jTable1.getValueAt(w8, 1);
-                            nextRollArray[w8] = LocalDateTime.now().plusMinutes(15);
-                            worker8 = new Worker8(perfil, w8, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
-                            procesando++;
-                            worker8.execute();
-                            semaforoWorker8 = worker8.get();
-                            if (nextRollArray[w8].isAfter(LocalDateTime.now().plusMinutes(5))) {
-                                terminadas++;
-                            }
-                            procesando--;
-
-                        } catch (InterruptedException | ExecutionException | IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    sumarRoll();
-                }
-            }
-        ;
-        }
-
-    ;
-    timer.schedule(tt,
-                4500, 1000);
-    }
-
     private void Sesionreloj() {
         Timer timerReloj = new Timer();
         TimerTask ttReloj = new TimerTask() {
@@ -1143,22 +719,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                         dia++;
                         relojLabel.setText(dia + " dia");
                     }
-                    procesandoLabel.setText("Procesando: " + procesando);
-                    terminadasLabel.setText("Terminadas: " + terminadas);
 
-                    esperaLabel.setText("En Espera: " + (model.getRowCount() - terminadas));
-                    if (terminadas >= model.getRowCount()) {
-                        terminadas = 0;
-                    }
-                    if (procesando == 0 && !openPopUp) {
-                        try {
-                            Runtime.getRuntime().exec("taskkill /F /IM geckodriver.exe");
-                            Runtime.getRuntime().exec("taskkill /F /IM firefox.exe");
-                        } catch (IOException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                    }
                 }
             }
         ;
@@ -1166,7 +727,57 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
 timerReloj.schedule(ttReloj, 1000, 1000);
     }
 
+    private void statusBar() {
+        timer = new Timer();
+        TimerTask tt = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+
+                    for (int i = 0; i < model.getRowCount(); i++) {
+                        terminadas = terminadas + terminada[i];
+                    }
+                    terminadaCheck = terminadas;
+
+                    procesandoLabel.setText("Procesando: " + procesando);
+                    terminadasLabel.setText("Terminadas: " + terminadaCheck);
+
+                    esperaLabel.setText("En Espera: " + (model.getRowCount() - terminadas));
+
+                    if (terminadaCheck >= model.getRowCount()) {
+                        System.out.println("Terminado" + terminadaCheck);
+                        terminadaCheck = 0;
+                        for (int i = 0; i < model.getRowCount(); i++) {
+                            terminada[i] = 0;
+                        }
+                    }
+                    terminadas = 0;
+                    if (procesando == 0 && !openPopUp) {
+                        try {
+                            Runtime.getRuntime().exec("taskkill /F /IM geckodriver.exe");
+                            Runtime.getRuntime().exec("taskkill /F /IM firefox.exe");
+                            Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
+                        } catch (IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            }
+        ;
+        }
+    ;
+    timer.schedule(tt,
+                1000, 1000);
+    }
+
     private void loadPerfiles() {
+        Icon listicon = new ImageIcon(getClass().getClassLoader().getResource("Vistas/icons8_Numeric_25px.png"));
+        JLabel iconLabel = new JLabel(listicon);
+        TableCellRenderer renderer = new JComponentTableCellRenderer();
+        TableColumnModel col = jTable1.getColumnModel();
+        TableColumn col0 = col.getColumn(0);
+        col0.setHeaderValue(iconLabel);
+        col0.setHeaderRenderer(renderer);
 
         ficheroPerfil2 = new File("C:\\Users\\" + System.getProperty("user.name")
                 + "\\AppData\\Roaming\\Mozilla\\Firefox\\profiles.ini");
@@ -1201,8 +812,7 @@ timerReloj.schedule(ttReloj, 1000, 1000);
 
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog(rootPane, "  No se han encontrado perfiles "
-                    + "de Firefox\n Crea un nuevo perfil o especifica la ruta "
-                    + "de tus perfiles", "Error al cargar perfiles.", JOptionPane.WARNING_MESSAGE);
+                    + "de Firefox", "Error al cargar perfiles.", JOptionPane.WARNING_MESSAGE);
 
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class
@@ -1214,10 +824,12 @@ timerReloj.schedule(ttReloj, 1000, 1000);
 
         nextRollArray = new LocalDateTime[model.getRowCount() + 1];
         balanceTotal = new int[model.getRowCount()];
+        terminada = new int[model.getRowCount()];
 
         for (int j = 0; j < model.getRowCount(); j++) {
             nextRollArray[j] = LocalDateTime.of(2017, Month.MARCH, 5, 6, 5).plusMinutes(j);
             balanceTotal[j] = 0;
+            terminada[j] = 0;
         }
         nextRollArray[model.getRowCount()] = LocalDateTime.of(2020, Month.MARCH, 5, 6, 5);
     }
@@ -1265,22 +877,19 @@ timerReloj.schedule(ttReloj, 1000, 1000);
             @Override
             public void run() {
 
+                openPopUp = false;
+                btcPriceStr = new BtcPrice().getRetornaPrecio();
+                jLabel6.setText("1 BTC ~ " + btcPriceStr + "$");
+
+                deleteUpdates();
+
+                String connectionURl = "jdbc:sqlserver://54.245.164.121:1433;"
+                        + "database=licenceDB;"
+                        + "user=" + user + ";"
+                        + "password=" + pass + ";";
                 try {
-                    openPopUp = false;
-                    btcPriceStr = new BtcPrice().getRetornaPrecio();
-                    jLabel6.setText("1 BTC ~ " + btcPriceStr + "$");
-
-                    deleteUpdates();
-
-                    Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
-
-                    String connectionURl = "jdbc:sqlserver://54.245.164.121:1433;"
-                            + "database=licenceDB;"
-                            + "user=" + user + ";"
-                            + "password=" + pass + ";";
                     Connection connection = DriverManager.getConnection(connectionURl);
-
-                } catch (SQLException | IOException ex) {
+                } catch (SQLException ex) {
                     Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
@@ -1363,5 +972,466 @@ timerReloj.schedule(ttReloj, 1000, 900000);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(ConfigFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+    }
+
+    private void runWorker1() {
+        timer = new Timer();
+        TimerTask tt = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+
+                    for (int x = 0; x < model.getRowCount(); x++) {
+                        if (nextRollArray[x].isBefore(nextRollArray[x + 1])
+                                || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[x])) {
+                                String estado = (String) jTable1.getValueAt(x, 11);
+
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w1 = x;
+                                    semaforoWorker1 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker1 = false;
+                        }
+                    }
+                    if (semaforoWorker1) {
+                        try {
+                            semaforoWorker1 = false;
+                            String perfil = (String) jTable1.getValueAt(w1, 1);
+                            nextRollArray[w1] = LocalDateTime.now().plusMinutes(15);
+                            worker = new Worker(perfil, w1, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            procesando++;
+                            worker.execute();
+                            Rectangle cellRect = jTable1.getCellRect(w1, 1, true);
+                            jTable1.scrollRectToVisible(cellRect);
+                            semaforoWorker1 = worker.get();
+                            if (nextRollArray[w1].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w1] = 1;
+                            }
+                            procesando--;
+
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        }
+
+    ;
+    timer.schedule(tt,
+                1000, 1000);
+    }
+
+    private void runWorker2() {
+        Timer timerTask = new Timer();
+        TimerTask ttWorker2 = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+                    for (int c = 0; c < model.getRowCount(); c++) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
+                                String estado = (String) jTable1.getValueAt(c, 11);
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w2 = c;
+                                    semaforoWorker2 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker2 = false;
+                        }
+                    }
+                    if (semaforoWorker2) {
+                        try {
+
+                            semaforoWorker2 = false;
+                            String perfil2 = (String) jTable1.getValueAt(w2, 1);
+                            nextRollArray[w2] = LocalDateTime.now().plusMinutes(15);
+                            worker2 = new Worker2(perfil2, w2, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            Rectangle cellRect = jTable1.getCellRect(w2, 1, true);
+                            jTable1.scrollRectToVisible(cellRect);
+                            procesando++;
+                            worker2.execute();
+
+                            semaforoWorker2 = worker2.get();
+
+                            if (nextRollArray[w2].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w2] = 1;
+                            }
+                            procesando--;
+
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        };
+            timerTask.schedule(ttWorker2,
+                1500, 1000);
+    }
+
+    private void runWorker3() {
+        Timer timerTaskWorker3 = new Timer();
+        TimerTask ttWorker3 = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+                    for (int q = 0; q < model.getRowCount(); q++) {
+                        if (nextRollArray[q].isBefore(nextRollArray[q + 1])
+                                || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[q])) {
+                                String estado = (String) jTable1.getValueAt(q, 11);
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w3 = q;
+                                    semaforoWorker3 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker3 = false;
+                        }
+                    }
+                    if (semaforoWorker3) {
+                        try {
+
+                            semaforoWorker3 = false;
+                            String perfil2 = (String) jTable1.getValueAt(w3, 1);
+                            nextRollArray[w3] = LocalDateTime.now().plusMinutes(15);
+                            worker3 = new Worker3(perfil2, w3, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            Rectangle cellRect = jTable1.getCellRect(w3, 1, true);
+                            jTable1.scrollRectToVisible(cellRect);
+                            procesando++;
+                            worker3.execute();
+
+                            semaforoWorker3 = worker3.get();
+
+                            if (nextRollArray[w3].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w3] = 1;
+                            }
+                            procesando--;
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        };
+timerTaskWorker3.schedule(ttWorker3, 2000, 1000);
+    }
+
+    private void runWorker4() {
+        Timer timerTaskWorker4 = new Timer();
+        TimerTask ttWorker4 = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+                    for (int q = 0; q < model.getRowCount(); q++) {
+                        if (nextRollArray[q].isBefore(nextRollArray[q + 1])
+                                || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[q])) {
+                                String estado = (String) jTable1.getValueAt(q, 11);
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w4 = q;
+                                    semaforoWorker4 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker4 = false;
+                        }
+                    }
+                    if (semaforoWorker4) {
+                        try {
+                            semaforoWorker4 = false;
+                            String perfil4 = (String) jTable1.getValueAt(w4, 1);
+                            nextRollArray[w4] = LocalDateTime.now().plusMinutes(15);
+                            worker4 = new Worker4(perfil4, w4, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            Rectangle cellRect = jTable1.getCellRect(w4, 1, true);
+                            jTable1.scrollRectToVisible(cellRect);
+                            procesando++;
+                            worker4.execute();
+
+                            semaforoWorker4 = worker4.get();
+
+                            if (nextRollArray[w4].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w4] = 1;
+                            }
+                            procesando--;
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        };
+timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
+    }
+
+    private void runWorker5() {
+        Timer timerTask = new Timer();
+        TimerTask ttWorker5 = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+                    for (int c = 0; c < model.getRowCount(); c++) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
+                                String estado = (String) jTable1.getValueAt(c, 11);
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w5 = c;
+                                    semaforoWorker5 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker5 = false;
+                        }
+                    }
+                    if (semaforoWorker5) {
+                        try {
+
+                            semaforoWorker5 = false;
+                            String perfil2 = (String) jTable1.getValueAt(w5, 1);
+                            nextRollArray[w5] = LocalDateTime.now().plusMinutes(15);
+                            worker5 = new Worker5(perfil2, w5, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            procesando++;
+                            worker5.execute();
+
+                            semaforoWorker5 = worker5.get();
+
+                            if (nextRollArray[w5].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w5] = 1;
+                            }
+                            procesando--;
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        };
+            timerTask.schedule(ttWorker5,
+                3000, 1000);
+    }
+
+    private void runWorker6() {
+        Timer timerTask = new Timer();
+        TimerTask ttWorker6 = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+                    for (int c = 0; c < model.getRowCount(); c++) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
+                                String estado = (String) jTable1.getValueAt(c, 11);
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w6 = c;
+                                    semaforoWorker6 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker6 = false;
+                        }
+                    }
+                    if (semaforoWorker6) {
+                        try {
+                            semaforoWorker6 = false;
+                            String perfil2 = (String) jTable1.getValueAt(w6, 1);
+                            nextRollArray[w6] = LocalDateTime.now().plusMinutes(15);
+                            worker6 = new Worker6(perfil2, w6, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            procesando++;
+                            worker6.execute();
+
+                            semaforoWorker6 = worker6.get();
+
+                            if (nextRollArray[w6].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w6] = 1;
+                            }
+                            procesando--;
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        };
+            timerTask.schedule(ttWorker6,
+                3500, 1000);
+    }
+
+    private void runWorker7() {
+        Timer timerTask = new Timer();
+        TimerTask ttWorker7 = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+                    for (int c = 0; c < model.getRowCount(); c++) {
+                        if (nextRollArray[c].isBefore(nextRollArray[c + 1])
+                                || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[c])) {
+                                String estado = (String) jTable1.getValueAt(c, 11);
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w7 = c;
+                                    semaforoWorker7 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker7 = false;
+                        }
+                    }
+                    if (semaforoWorker7) {
+                        try {
+                            semaforoWorker7 = false;
+                            String perfil2 = (String) jTable1.getValueAt(w7, 1);
+                            nextRollArray[w7] = LocalDateTime.now().plusMinutes(15);
+                            worker7 = new Worker7(perfil2, w7, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            procesando++;
+                            worker7.execute();
+                            semaforoWorker7 = worker7.get();
+
+                            if (nextRollArray[w7].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w7] = 1;
+                            }
+                            procesando--;
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        };
+            timerTask.schedule(ttWorker7,
+                4000, 1000);
+    }
+
+    private void runWorker8() {
+        timer = new Timer();
+        TimerTask tt = new TimerTask() {
+            @Override
+            public void run() {
+                if (pause) {
+                    for (int x = 0; x < model.getRowCount(); x++) {
+                        if (nextRollArray[x].isBefore(nextRollArray[x + 1])
+                                || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
+
+                            if (LocalDateTime.now().isAfter(nextRollArray[x])) {
+                                String estado = (String) jTable1.getValueAt(x, 11);
+
+                                if (estado.contains("Esperando siguiente ronda")
+                                        || estado.equals("¡Aun no es la hora del Roll!")
+                                        || estado.equals("")
+                                        || estado.equals("Ha ocurrido un error")
+                                        || estado.equals("CAPTCHA_TIMEOUT")) {
+
+                                    w8 = x;
+                                    semaforoWorker8 = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            semaforoWorker8 = false;
+                        }
+                    }
+                    if (semaforoWorker8) {
+                        try {
+                            semaforoWorker8 = false;
+                            String perfil = (String) jTable1.getValueAt(w8, 1);
+                            nextRollArray[w8] = LocalDateTime.now().plusMinutes(15);
+                            worker8 = new Worker8(perfil, w8, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, activeCaptchastatus);
+                            procesando++;
+                            worker8.execute();
+                            semaforoWorker8 = worker8.get();
+                            if (nextRollArray[w8].isAfter(LocalDateTime.now().plusMinutes(5))) {
+                                terminada[w8] = 1;
+                            }
+                            procesando--;
+
+                        } catch (InterruptedException | ExecutionException | IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    sumarRoll();
+                }
+            }
+        ;
+        }
+    ;
+    timer.schedule(tt,
+                4500, 1000);
     }
 }

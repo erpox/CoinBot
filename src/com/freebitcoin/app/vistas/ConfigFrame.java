@@ -49,10 +49,7 @@ public class ConfigFrame extends javax.swing.JFrame {
         monsterIP = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         captchaKey = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        activeCaptcha = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
-        activeWorkers = new javax.swing.JSpinner();
         jLabel6 = new javax.swing.JLabel();
         bonusRP = new javax.swing.JCheckBox();
         bonoBTC = new javax.swing.JCheckBox();
@@ -67,6 +64,7 @@ public class ConfigFrame extends javax.swing.JFrame {
         proxyUser = new javax.swing.JTextField();
         AlwaysOnTop = new javax.swing.JCheckBox();
         jLabel11 = new javax.swing.JLabel();
+        activeWorkers = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setAlwaysOnTop(true);
@@ -117,38 +115,27 @@ public class ConfigFrame extends javax.swing.JFrame {
 
         monsterIP.setBackground(new java.awt.Color(51, 51, 51));
         monsterIP.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        monsterIP.setForeground(new java.awt.Color(204, 204, 204));
-        monsterIP.setText("127.0.0.3:80");
+        monsterIP.setForeground(new java.awt.Color(220, 220, 220));
+        monsterIP.setText("127.0.0.3");
         jPanel1.add(monsterIP, new org.netbeans.lib.awtextra.AbsoluteConstraints(137, 98, 145, -1));
 
         jLabel3.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Key_20px.png"))); // NOI18N
-        jLabel3.setText("2Captcha:");
+        jLabel3.setText("Captcha:");
         jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 53, -1, -1));
 
         captchaKey.setBackground(new java.awt.Color(51, 51, 51));
         captchaKey.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        captchaKey.setForeground(new java.awt.Color(204, 204, 204));
+        captchaKey.setForeground(new java.awt.Color(220, 220, 220));
         captchaKey.setText("6bb66728c813db2c10301d064aea5fea");
         jPanel1.add(captchaKey, new org.netbeans.lib.awtextra.AbsoluteConstraints(105, 50, 200, -1));
-
-        jLabel4.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("Captcha Activo:");
-        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 55, -1, -1));
-
-        activeCaptcha.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2Captcha", "CapMonster" }));
-        jPanel1.add(activeCaptcha, new org.netbeans.lib.awtextra.AbsoluteConstraints(415, 55, 90, 20));
 
         jLabel5.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Workers_20px.png"))); // NOI18N
         jLabel5.setText("Mineros:");
-        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(335, 100, 80, 20));
-
-        activeWorkers.setModel(new javax.swing.SpinnerNumberModel(1, 1, 8, 1));
-        jPanel1.add(activeWorkers, new org.netbeans.lib.awtextra.AbsoluteConstraints(415, 100, 70, -1));
+        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 50, 80, 20));
         jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, -1, -1));
 
         bonusRP.setBackground(new java.awt.Color(51, 51, 51));
@@ -183,7 +170,7 @@ public class ConfigFrame extends javax.swing.JFrame {
                 jButton2ActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 260, -1, -1));
+        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(498, 261, -1, -1));
 
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Star_Filled_20px.png"))); // NOI18N
         jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 202, -1, -1));
@@ -203,14 +190,14 @@ public class ConfigFrame extends javax.swing.JFrame {
 
         proxyPass.setBackground(new java.awt.Color(51, 51, 51));
         proxyPass.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        proxyPass.setForeground(new java.awt.Color(204, 204, 204));
+        proxyPass.setForeground(new java.awt.Color(220, 220, 220));
         proxyPass.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         proxyPass.setText("Contraseña");
         jPanel1.add(proxyPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 143, 90, -1));
 
         proxyUser.setBackground(new java.awt.Color(51, 51, 51));
         proxyUser.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        proxyUser.setForeground(new java.awt.Color(204, 204, 204));
+        proxyUser.setForeground(new java.awt.Color(220, 220, 220));
         proxyUser.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         proxyUser.setText("Usuario");
         jPanel1.add(proxyUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(85, 143, 90, -1));
@@ -225,6 +212,10 @@ public class ConfigFrame extends javax.swing.JFrame {
         jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_iMac_20px.png"))); // NOI18N
         jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 240, -1, -1));
 
+        activeWorkers.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
+        activeWorkers.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", "7", "8" }));
+        jPanel1.add(activeWorkers, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 50, 60, 20));
+
         jPanel3.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 0, -1, 290));
 
         getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 530, 300));
@@ -238,9 +229,14 @@ public class ConfigFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        saveProp();
-        JOptionPane.showConfirmDialog(rootPane, "Los cambios surtiran efecto cuando presiones \"Iniciar\" o reinicies la aplicación.", "Guardar", 2, 2);
-        this.dispose();
+
+        int n = JOptionPane.showConfirmDialog(rootPane, "Los cambios surtiran efecto cuando presiones \"Iniciar\" o reinicies la aplicación.", "Guardar", 2, 2);
+        
+        if (n == 0) {
+            saveProp();
+            this.dispose();
+        }
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
@@ -250,8 +246,7 @@ public class ConfigFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox AlwaysOnTop;
-    private javax.swing.JComboBox<String> activeCaptcha;
-    private javax.swing.JSpinner activeWorkers;
+    private javax.swing.JComboBox<String> activeWorkers;
     private javax.swing.JCheckBox backgroundStatus;
     private javax.swing.JCheckBox bonoBTC;
     private javax.swing.JCheckBox bonusRP;
@@ -263,7 +258,6 @@ public class ConfigFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -279,10 +273,9 @@ public class ConfigFrame extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     public void saveProp() {
-        PROP.setProperty("activeWorkers", String.valueOf(activeWorkers.getValue()));
+        PROP.setProperty("activeWorkers", activeWorkers.getSelectedItem().toString());
         PROP.setProperty("proxyUser", proxyUser.getText());
         PROP.setProperty("backGroundSelectSatatus", String.valueOf(backgroundStatus.isSelected()));
-        PROP.setProperty("activeCaptcha", String.valueOf(activeCaptcha.getSelectedIndex()));
         PROP.setProperty("bonoBtcSelectStatus", String.valueOf(bonoBTC.isSelected()));
         PROP.setProperty("proxyPass", proxyPass.getText());
         PROP.setProperty("bonoRpelectStatus", String.valueOf(bonusRP.isSelected()));
@@ -318,8 +311,7 @@ public class ConfigFrame extends javax.swing.JFrame {
             proxyUser.setText(PROP.getProperty("proxyUser"));
             proxyPass.setText(PROP.getProperty("proxyPass"));
 
-            activeCaptcha.setSelectedIndex(Integer.parseInt(PROP.getProperty("activeCaptcha")));
-            activeWorkers.setValue(Integer.parseInt(PROP.getProperty("activeWorkers")));
+            activeWorkers.setSelectedItem(PROP.getProperty("activeWorkers"));
             AlwaysOnTop.setSelected(Boolean.valueOf(PROP.getProperty("alwaysTop")));
             bonusRP.setSelected(Boolean.valueOf(PROP.getProperty("bonoRpelectStatus")));
             bonoBTC.setSelected(Boolean.valueOf(PROP.getProperty("bonoBtcSelectStatus")));

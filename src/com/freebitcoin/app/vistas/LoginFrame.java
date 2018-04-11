@@ -122,12 +122,8 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 173, -1, -1));
 
         jCheckBox1.setBackground(new java.awt.Color(250, 250, 250));
+        jCheckBox1.setSelected(true);
         jCheckBox1.setText("Guardar contraseña");
-        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox1ActionPerformed(evt);
-            }
-        });
         jPanel2.add(jCheckBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 210, -1, -1));
 
         jButton2.setBackground(new java.awt.Color(250, 250, 250));
@@ -171,23 +167,22 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        if (jCheckBox1.isSelected()) {
+            try {
+                PROP.setProperty("user", jTextField1.getText());
+                PROP.setProperty("pass", jPasswordField1.getText());
+                PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+
+            } catch (IOException ex) {
+                Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         new Thread(this).start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         System.exit(0);
     }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        try {
-            PROP.setProperty("user", jTextField1.getText());
-            PROP.setProperty("pass", jPasswordField1.getText());
-            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
-
-        } catch (IOException ex) {
-            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_jCheckBox1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -272,7 +267,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jButton1.setEnabled(false);
         if (dbConnection()) {
             try {
-                //            resulSetLicencia();
+//                            resulSetLicencia();
 //            for (int i = 0; i < 5; i++) {
 //                if (systemInfo[i].equals(systemInfoDB[i])) {
 //                    f++;
@@ -297,8 +292,9 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
 //
 //                System.exit(0);
 //            }
-              new MainFrame(user, password).setVisible(true);
-              
+                new MainFrame(user, password).setVisible(true);
+                this.dispose();
+
             } catch (IOException ex) {
                 Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
             }

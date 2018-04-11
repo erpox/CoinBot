@@ -390,7 +390,7 @@ public class Worker2 extends SwingWorker<Boolean, String> {
             }
 
         }else if (activeCaptchastatus.equals("1")) {
-            CapMonsterControl capMonster = new CapMonsterControl();
+            CapMonsterControl capMonster = new CapMonsterControl(proxies.get(selector).getProxy(), proxies.get(selector).getPuerto());
             responseToken = capMonster.Tokenizer();
         }
 
