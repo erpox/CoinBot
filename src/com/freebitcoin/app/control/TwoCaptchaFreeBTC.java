@@ -56,20 +56,17 @@ public class TwoCaptchaFreeBTC {
        }
         try {    
             responseToken = service.solveCaptcha();
-            System.out.println("The response token is: " + responseToken);
+            
             return responseToken;
         } catch (InterruptedException e) {
             System.out.println("ERROR case 1");
-            responseToken = "No solution";
             e.printStackTrace();
             return responseToken;
         } catch (IOException e) {
             System.out.println("ERROR case 2");
-            responseToken = "No solution";
             e.printStackTrace();
             return responseToken;
         } catch (Exception e) {
-            responseToken = "error de conexion";
             return responseToken;
         }
     }

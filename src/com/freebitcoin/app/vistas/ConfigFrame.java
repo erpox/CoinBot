@@ -213,7 +213,7 @@ public class ConfigFrame extends javax.swing.JFrame {
         jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 240, -1, -1));
 
         activeWorkers.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        activeWorkers.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", "7", "8" }));
+        activeWorkers.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4" }));
         jPanel1.add(activeWorkers, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 50, 60, 20));
 
         jPanel3.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 0, -1, 290));

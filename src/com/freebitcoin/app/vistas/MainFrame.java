@@ -155,8 +155,6 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
 
         jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Firefox_15px.png"))); // NOI18N
         jMenuItem1.setText("Abrir perfil");
@@ -222,7 +220,7 @@ public class MainFrame extends javax.swing.JFrame {
         labelBalancetotal.setText("Balance: 0 Sat ~ $ 0");
         jPanel1.add(labelBalancetotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 100, -1, -1));
 
-        LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/LogoCoinBOT (1).png"))); // NOI18N
+        LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/CoinBOT Mini logo(1).png"))); // NOI18N
         jPanel1.add(LogoLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(287, 0, -1, 120));
 
         BotonPause.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Pause_Button_30px_2_1.png"))); // NOI18N
@@ -268,7 +266,7 @@ public class MainFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "#","Perfil", "Balance", "Puntos", "<html><center>Roll<br>BTC</center></html>", "<html><center>Roll<br>Puntos</center></html>","Porcentaje", "<html><center>Bono<br>RP</center></html>",
+                "#","Perfil", "Balance", "Puntos", "<html><center>Roll<br>BTC</center></html>", "<html><center>Roll<br>Puntos</center></html>", "<html><center>Bono<br>RP</center></html>",
                 "<html><center>Bono RP<br>FIN</center></html>","<html><center>Bono<br>BTC</center></html>","<html><center>Bono BTC<br>FIN</center></html>", "<html><center>Prox.<br>Roll</center></html>", "Estado"
             }
         ) {
@@ -285,8 +283,6 @@ public class MainFrame extends javax.swing.JFrame {
                 , java.lang.Integer.class
 
                 , java.lang.Integer.class
-
-                , java.lang.Object.class
 
                 , java.lang.Object.class
 
@@ -342,13 +338,12 @@ public class MainFrame extends javax.swing.JFrame {
         columnModel.getColumn(3).setPreferredWidth(25);
         columnModel.getColumn(4).setPreferredWidth(20);
         columnModel.getColumn(5).setPreferredWidth(20);
-        columnModel.getColumn(5).setPreferredWidth(30);
+        columnModel.getColumn(6).setPreferredWidth(30);
         columnModel.getColumn(7).setPreferredWidth(25);
         columnModel.getColumn(8).setPreferredWidth(35);
         columnModel.getColumn(9).setPreferredWidth(30);
         columnModel.getColumn(10).setPreferredWidth(35);
-        columnModel.getColumn(11).setPreferredWidth(35);
-        columnModel.getColumn(12).setPreferredWidth(230);
+        columnModel.getColumn(11).setPreferredWidth(235);
         jTable1.setComponentPopupMenu(jPopupMenu1);
         jTable1.setFont(new java.awt.Font("Microsoft JhengHei", 1, 13)); // NOI18N
         jTable1.setGridColor(new java.awt.Color(102, 102, 102));
@@ -469,21 +464,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 656, 878, 33));
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(jTable2);
-
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 100, -1, -1));
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -553,39 +533,39 @@ public class MainFrame extends javax.swing.JFrame {
                 runWorker3();
                 runWorker4();
                 break;
-            case 5:
-                runWorker1();
-                runWorker2();
-                runWorker3();
-                runWorker4();
-                runWorker5();
-                break;
-            case 6:
-                runWorker1();
-                runWorker2();
-                runWorker3();
-                runWorker4();
-                runWorker5();
-                runWorker6();
-                break;
-            case 7:
-                runWorker1();
-                runWorker2();
-                runWorker3();
-                runWorker4();
-                runWorker5();
-                runWorker6();
-                runWorker7();
-                break;
-            case 8:
-                runWorker1();
-                runWorker2();
-                runWorker3();
-                runWorker4();
-                runWorker5();
-                runWorker6();
-                runWorker7();
-                runWorker8();
+//            case 5:
+//                runWorker1();
+//                runWorker2();
+//                runWorker3();
+//                runWorker4();
+//                runWorker5();
+//                break;
+//            case 6:
+//                runWorker1();
+//                runWorker2();
+//                runWorker3();
+//                runWorker4();
+//                runWorker5();
+//                runWorker6();
+//                break;
+//            case 7:
+//                runWorker1();
+//                runWorker2();
+//                runWorker3();
+//                runWorker4();
+//                runWorker5();
+//                runWorker6();
+//                runWorker7();
+//                break;
+//            case 8:
+//                runWorker1();
+//                runWorker2();
+//                runWorker3();
+//                runWorker4();
+//                runWorker5();
+//                runWorker6();
+//                runWorker7();
+//                runWorker8();
         }
 
         Sesionreloj();
@@ -606,6 +586,7 @@ public class MainFrame extends javax.swing.JFrame {
             model.setValueAt(newNum, i, 0);
             newNum++;
         }
+        totalPerfilesLabel.setText("Total: " + model.getRowCount());
         nextRollArray[model.getRowCount()] = LocalDateTime.of(2020, Month.MARCH, 5, 6, 5);
     }//GEN-LAST:event_botonBorrarPerfilActionPerformed
 
@@ -676,10 +657,8 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu jPopupMenu1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private org.jdesktop.swingx.JXTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JLabel labelBalancetotal;
     private javax.swing.JLabel labelSesion1;
     private javax.swing.JLabel procesandoLabel;
@@ -716,6 +695,11 @@ public class MainFrame extends javax.swing.JFrame {
                     reloj = reloj.plusSeconds(1);
                     jLabel4.setText(reloj.toString());
                     if (reloj.isAfter(LocalTime.of(23, 59, 58))) {
+                        try {
+                            Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
+                        } catch (IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                         dia++;
                         relojLabel.setText(dia + " dia");
                     }
@@ -756,7 +740,8 @@ timerReloj.schedule(ttReloj, 1000, 1000);
                         try {
                             Runtime.getRuntime().exec("taskkill /F /IM geckodriver.exe");
                             Runtime.getRuntime().exec("taskkill /F /IM firefox.exe");
-                            Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
+
+                            
                         } catch (IOException ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -767,7 +752,7 @@ timerReloj.schedule(ttReloj, 1000, 1000);
         }
     ;
     timer.schedule(tt,
-                1000, 1000);
+                5000, 10000);
     }
 
     private void loadPerfiles() {
@@ -927,18 +912,18 @@ timerReloj.schedule(ttReloj, 1000, 900000);
                 case 4:
                     jLabel2.setText("4");
                     break;
-                case 5:
-                    jLabel2.setText("5");
-                    break;
-                case 6:
-                    jLabel2.setText("6");
-                    break;
-                case 7:
-                    jLabel2.setText("7");
-                    break;
-                case 8:
-                    jLabel2.setText("8");
-                    break;
+//                case 5:
+//                    jLabel2.setText("5");
+//                    break;
+//                case 6:
+//                    jLabel2.setText("6");
+//                    break;
+//                case 7:
+//                    jLabel2.setText("7");
+//                    break;
+//                case 8:
+//                    jLabel2.setText("8");
+//                    break;
             }
 
         } catch (FileNotFoundException ex) {
