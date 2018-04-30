@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,6 +23,9 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     private final String[] systemInfoDB = new String[5];
     private static String user;
     private static String password;
+    private static String ID_BOT ="ST" ;
+    private static String ID_BOT_DB;
+    private boolean active;
     private Connection connection;
     private final Properties PROP = new Properties();
     private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
@@ -131,6 +135,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jButton2.setBorder(null);
         jButton2.setBorderPainted(false);
         jButton2.setContentAreaFilled(false);
+        jButton2.setFocusable(false);
         jButton2.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Cancel_25px_1.png"))); // NOI18N
         jButton2.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Cancel_25px_1.png"))); // NOI18N
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -177,7 +182,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
                 Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        new Thread(this).start();
+        new Thread().start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -206,7 +211,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
 
     private boolean dbConnection() {
         try {
-            String connectionURl = "jdbc:sqlserver://54.245.164.121:1433;;"
+            String connectionURl = "jdbc:sqlserver://140.82.49.125:1433;"
                     + "database=licenceDB;"
                     + "user=" + user + ";"
                     + "password=" + password + ";";
@@ -239,20 +244,49 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
     }
 
     @SuppressWarnings("empty-statement")
-    private void resulSetLicencia() {
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from licenceUsuarios where id_usuario='" + user + "'");
+    private void resulSetLicencia() throws SQLException {
+
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery("select id_bot from licenceUsuarios where id_usuario='" + user + "';");
+        while (rs.next()) {
+            ID_BOT_DB = rs.getString("id_bot");
+        }
+        if (ID_BOT_DB.contains(ID_BOT)) {
+            rs = stmt.executeQuery("select active_licence from licenceUsuarios where id_usuario='" + user + "';");
             while (rs.next()) {
-                systemInfoDB[0] = rs.getString("id_Cpu");
-                systemInfoDB[1] = rs.getString("id_HDD");
-                systemInfoDB[2] = rs.getString("id_Bios");
-                systemInfoDB[3] = rs.getString("id_UUID");
-                systemInfoDB[4] = rs.getString("id_baseboard");
+                active = rs.getBoolean("active_licence");
             }
 
-        } catch (SQLException ex) {
-            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+            if (active) {
+                rs = stmt.executeQuery("select * from licenceUsuarios where id_usuario='" + user + "';");
+                while (rs.next()) {
+                    systemInfoDB[0] = rs.getString("id_Cpu");
+                    systemInfoDB[1] = rs.getString("id_HDD");
+                    systemInfoDB[2] = rs.getString("id_Bios");
+                    systemInfoDB[3] = rs.getString("id_UUID");
+                    systemInfoDB[4] = rs.getString("id_baseboard");
+                }
+
+            } else {
+                stmt.executeUpdate("UPDATE licenceUsuarios SET active_licence='" + true + "',"
+                        + "id_Cpu='" + systemInfo[0] + "', "
+                        + "id_HDD='" + systemInfo[1] + "', "
+                        + "id_Bios='" + systemInfo[2] + "', "
+                        + "id_UUID='" + systemInfo[3] + "', "
+                        + "id_baseboard='" + systemInfo[4] + "' "
+                        + "WHERE id_usuario='" + user + "';");
+
+                rs = stmt.executeQuery("select * from licenceUsuarios where id_usuario='" + user + "';");
+                while (rs.next()) {
+                    systemInfoDB[0] = rs.getString("id_Cpu");
+                    systemInfoDB[1] = rs.getString("id_HDD");
+                    systemInfoDB[2] = rs.getString("id_Bios");
+                    systemInfoDB[3] = rs.getString("id_UUID");
+                    systemInfoDB[4] = rs.getString("id_baseboard");
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Esta versión de coinBOT no es compatible con tu licencia", "Error de version ", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -267,36 +301,36 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
         jButton1.setEnabled(false);
         if (dbConnection()) {
             try {
-//                            resulSetLicencia();
-//            for (int i = 0; i < 5; i++) {
-//                if (systemInfo[i].equals(systemInfoDB[i])) {
-//                    f++;
-//                }
-//            }
-//            if (f == 5) {
-//                try {
-//                    jLabel9.setText("");
-//                    jLabel8.setVisible(false);
-//                    JOptionPane.showMessageDialog(rootPane, "Has iniciado sesión", "Let's Make Money", 1);
-//
-//                    new MainFrame(user,password).setVisible(true);
-//                    this.dispose();
-//                } catch (IOException ex) {
-//                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            } else {
-//                jLabel9.setText("");
-//                jLabel8.setVisible(false);
-//                JOptionPane.showMessageDialog(rootPane, "Este equipo no esta "
-//                        + "autorizado para el uso de este programa", "Error de activacion", JOptionPane.ERROR_MESSAGE);
-//
-//                System.exit(0);
-//            }
-                new MainFrame(user, password).setVisible(true);
-                this.dispose();
+                resulSetLicencia();
 
-            } catch (IOException ex) {
-                Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginFrame.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+
+            for (int i = 0; i < 5; i++) {
+                if (systemInfo[i].equals(systemInfoDB[i])) {
+                    f++;
+                }
+            }
+            if (f == 5) {
+                try {
+                    jLabel9.setText("");
+                    jLabel8.setVisible(false);
+                    JOptionPane.showMessageDialog(rootPane, "Has iniciado sesión", "Let's Make Money", 1);
+
+                    new MainFrame(user, password).setVisible(true);
+                    this.dispose();
+                } catch (IOException ex) {
+                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                jLabel9.setText("");
+                jLabel8.setVisible(false);
+                JOptionPane.showMessageDialog(rootPane, "Este equipo no esta "
+                        + "autorizado para el uso de este programa", "Error de activacion", JOptionPane.ERROR_MESSAGE);
+
+                System.exit(0);
             }
         }
     }
@@ -306,10 +340,14 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
             PROP.load(new FileReader(PROP_PATH));
             jTextField1.setText(PROP.getProperty("user"));
             jPasswordField1.setText(PROP.getProperty("pass"));
+
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LoginFrame.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
         } catch (IOException ex) {
-            Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LoginFrame.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -319,10 +357,12 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
                 if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
+
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ConfigFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ConfigFrame.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
 }

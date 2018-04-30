@@ -1,4 +1,3 @@
-
 package com.freebitcoin.app.control;
 
 import com.freebitcoin.app.vistas.LoginFrame;
@@ -26,7 +25,10 @@ public class Activacion {
             cpuIDsN = sc.next();
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
+        }catch (NoSuchElementException ex) {
+            cpuIDsN = "No hay CPU";
         }
+        System.out.println(cpuIDsN);
     }
 
     private void hardDiskDriveID() {
@@ -39,7 +41,10 @@ public class Activacion {
             hddSN = sc.next();
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchElementException ex) {
+           hddSN = "No hay HDD";
         }
+        System.out.println(hddSN);
     }
 
     private void biosID() {
@@ -50,11 +55,12 @@ public class Activacion {
             Scanner sc = new Scanner(processBIOS.getInputStream());
             sc.next();
             biosIDsN = sc.next();
-        }catch (NoSuchElementException ex) {
-                motherIDsN = "No hay serial BIOS";            
+        } catch (NoSuchElementException ex) {
+            biosIDsN = "No hay serial BIOS";
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
         }
+         System.out.println(biosIDsN);
     }
 
     private void uddID() {
@@ -68,7 +74,10 @@ public class Activacion {
 
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
+        }catch (NoSuchElementException ex) {
+            uddIDsN = "No hay UUID";
         }
+        System.out.println(uddIDsN);
 
     }
 
@@ -88,18 +97,19 @@ public class Activacion {
         } catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.out.println(motherIDsN);
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        Activacion acti = new Activacion();
-        acti.cpuID();
-        acti.hardDiskDriveID();
-        acti.biosID();
-        acti.uddID();
-        acti.motherID();
-        String[] systemInfo = {cpuIDsN, hddSN, biosIDsN, uddIDsN, motherIDsN};
-
-            Thread.sleep(8000);
-            new LoginFrame(systemInfo).setVisible(true);
-    }
+//    public static void main(String[] args) throws IOException, InterruptedException {
+//        Activacion acti = new Activacion();
+//        acti.cpuID();
+//        acti.hardDiskDriveID();
+//        acti.biosID();
+//        acti.uddID();
+//        acti.motherID();
+//        String[] systemInfo = {cpuIDsN, hddSN, biosIDsN, uddIDsN, motherIDsN};
+//
+//        Thread.sleep(8000);
+//        new LoginFrame(systemInfo).setVisible(true);
+//    }
 }

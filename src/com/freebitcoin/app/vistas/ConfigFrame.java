@@ -53,11 +53,9 @@ public class ConfigFrame extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         bonusRP = new javax.swing.JCheckBox();
         bonoBTC = new javax.swing.JCheckBox();
-        backgroundStatus = new javax.swing.JCheckBox();
         jSeparator1 = new javax.swing.JSeparator();
         jButton2 = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         proxyPass = new javax.swing.JTextField();
@@ -65,6 +63,14 @@ public class ConfigFrame extends javax.swing.JFrame {
         AlwaysOnTop = new javax.swing.JCheckBox();
         jLabel11 = new javax.swing.JLabel();
         activeWorkers = new javax.swing.JComboBox<>();
+        backgroundStatus = new javax.swing.JCheckBox();
+        jLabel12 = new javax.swing.JLabel();
+        modoAvanzado = new javax.swing.JCheckBox();
+        jComboBox1 = new javax.swing.JComboBox<>();
+        jComboBox2 = new javax.swing.JComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        sendProxy = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setAlwaysOnTop(true);
@@ -86,7 +92,7 @@ public class ConfigFrame extends javax.swing.JFrame {
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/capmonsterminipng.png"))); // NOI18N
         jLabel2.setText("CapMonster IP:");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, -1, -1));
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, -1, -1));
 
         jPanel2.setBackground(new java.awt.Color(0, 120, 215));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -109,53 +115,49 @@ public class ConfigFrame extends javax.swing.JFrame {
                 jButton1ActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(499, 3, -1, -1));
+        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 3, -1, -1));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 525, 30));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 560, 30));
 
         monsterIP.setBackground(new java.awt.Color(51, 51, 51));
         monsterIP.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
         monsterIP.setForeground(new java.awt.Color(220, 220, 220));
         monsterIP.setText("127.0.0.3");
-        jPanel1.add(monsterIP, new org.netbeans.lib.awtextra.AbsoluteConstraints(137, 98, 145, -1));
+        monsterIP.setPreferredSize(new java.awt.Dimension(120, 23));
+        jPanel1.add(monsterIP, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 50, 120, -1));
 
         jLabel3.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Key_20px.png"))); // NOI18N
-        jLabel3.setText("Captcha:");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 53, -1, -1));
+        jLabel3.setText("CapMonster Key:");
+        jLabel3.setToolTipText("");
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 50, 130, -1));
 
         captchaKey.setBackground(new java.awt.Color(51, 51, 51));
         captchaKey.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
         captchaKey.setForeground(new java.awt.Color(220, 220, 220));
-        captchaKey.setText("6bb66728c813db2c10301d064aea5fea");
-        jPanel1.add(captchaKey, new org.netbeans.lib.awtextra.AbsoluteConstraints(105, 50, 200, -1));
+        captchaKey.setText("1234567890aAbBcC");
+        jPanel1.add(captchaKey, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 50, 120, -1));
 
         jLabel5.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Workers_20px.png"))); // NOI18N
         jLabel5.setText("Mineros:");
-        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 50, 80, 20));
+        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 180, 80, 20));
         jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, -1, -1));
 
         bonusRP.setBackground(new java.awt.Color(51, 51, 51));
         bonusRP.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         bonusRP.setForeground(new java.awt.Color(255, 255, 255));
         bonusRP.setText("Bonos Reward Point");
-        jPanel1.add(bonusRP, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 200, 140, -1));
+        jPanel1.add(bonusRP, new org.netbeans.lib.awtextra.AbsoluteConstraints(39, 228, -1, 20));
 
         bonoBTC.setBackground(new java.awt.Color(51, 51, 51));
         bonoBTC.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         bonoBTC.setForeground(new java.awt.Color(255, 255, 255));
         bonoBTC.setText("Bonos BTC");
-        jPanel1.add(bonoBTC, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 200, 110, -1));
-
-        backgroundStatus.setBackground(new java.awt.Color(51, 51, 51));
-        backgroundStatus.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
-        backgroundStatus.setForeground(new java.awt.Color(255, 255, 255));
-        backgroundStatus.setText("Segundo Plano");
-        jPanel1.add(backgroundStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 200, -1, -1));
-        jPanel1.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 185, 490, -1));
+        jPanel1.add(bonoBTC, new org.netbeans.lib.awtextra.AbsoluteConstraints(235, 228, 90, 20));
+        jPanel1.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 150, 515, -1));
 
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Checked_25px.png"))); // NOI18N
         jButton2.setBorder(null);
@@ -170,55 +172,90 @@ public class ConfigFrame extends javax.swing.JFrame {
                 jButton2ActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(498, 261, -1, -1));
+        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(528, 305, -1, -1));
 
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Star_Filled_20px.png"))); // NOI18N
-        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 202, -1, -1));
-
-        jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Loyalty_Card_20px.png"))); // NOI18N
-        jLabel8.setLabelFor(bonoBTC);
-        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 202, 30, -1));
+        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 228, -1, -1));
 
         jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Hide_20px.png"))); // NOI18N
-        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 202, -1, -1));
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, -1, -1));
 
         jLabel10.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         jLabel10.setForeground(new java.awt.Color(255, 255, 255));
         jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Firewall_20px.png"))); // NOI18N
         jLabel10.setText("Proxy:");
-        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 145, -1, -1));
+        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, -1, -1));
 
         proxyPass.setBackground(new java.awt.Color(51, 51, 51));
         proxyPass.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
         proxyPass.setForeground(new java.awt.Color(220, 220, 220));
         proxyPass.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         proxyPass.setText("Contraseña");
-        jPanel1.add(proxyPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 143, 90, -1));
+        jPanel1.add(proxyPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 100, 90, -1));
 
         proxyUser.setBackground(new java.awt.Color(51, 51, 51));
         proxyUser.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
         proxyUser.setForeground(new java.awt.Color(220, 220, 220));
         proxyUser.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         proxyUser.setText("Usuario");
-        jPanel1.add(proxyUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(85, 143, 90, -1));
+        jPanel1.add(proxyUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 100, 90, -1));
 
         AlwaysOnTop.setBackground(new java.awt.Color(51, 51, 51));
         AlwaysOnTop.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
         AlwaysOnTop.setForeground(new java.awt.Color(255, 255, 255));
         AlwaysOnTop.setText("Fijar ventana");
         AlwaysOnTop.setBorder(null);
-        jPanel1.add(AlwaysOnTop, new org.netbeans.lib.awtextra.AbsoluteConstraints(45, 240, -1, -1));
+        jPanel1.add(AlwaysOnTop, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 182, -1, -1));
 
         jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_iMac_20px.png"))); // NOI18N
-        jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 240, -1, -1));
+        jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(216, 181, -1, -1));
 
         activeWorkers.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
-        activeWorkers.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4" }));
-        jPanel1.add(activeWorkers, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 50, 60, 20));
+        activeWorkers.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" }));
+        jPanel1.add(activeWorkers, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 180, 60, 20));
 
-        jPanel3.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 0, -1, 290));
+        backgroundStatus.setBackground(new java.awt.Color(51, 51, 51));
+        backgroundStatus.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        backgroundStatus.setForeground(new java.awt.Color(255, 255, 255));
+        backgroundStatus.setText("Segundo Plano");
+        jPanel1.add(backgroundStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 180, -1, 20));
 
-        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 530, 300));
+        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Loyalty_Card_20px.png"))); // NOI18N
+        jLabel12.setLabelFor(bonoBTC);
+        jPanel1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(215, 228, 20, -1));
+
+        modoAvanzado.setBackground(new java.awt.Color(51, 51, 51));
+        modoAvanzado.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        modoAvanzado.setForeground(new java.awt.Color(255, 255, 255));
+        modoAvanzado.setText("Tabla Avanzada");
+        modoAvanzado.setPreferredSize(new java.awt.Dimension(119, 17));
+        jPanel1.add(modoAvanzado, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 230, 130, 17));
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "100 RP", "50 RP", "10 RP", "1 RP" }));
+        jPanel1.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 274, 60, -1));
+
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1000%", "500%", "100%", "50%", "10%" }));
+        jPanel1.add(jComboBox2, new org.netbeans.lib.awtextra.AbsoluteConstraints(328, 274, 60, -1));
+
+        jLabel4.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Limite Bonos RP: ");
+        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(25, 275, -1, -1));
+
+        jLabel8.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel8.setText("Limite Bonos BTC: ");
+        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(215, 275, -1, -1));
+
+        sendProxy.setBackground(new java.awt.Color(51, 51, 51));
+        sendProxy.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        sendProxy.setForeground(new java.awt.Color(255, 255, 255));
+        sendProxy.setText("Enviar Proxy a CapMonster");
+        jPanel1.add(sendProxy, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 100, -1, -1));
+
+        jPanel3.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 0, 555, 332));
+
+        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 560, 335));
 
         pack();
         setLocationRelativeTo(null);
@@ -230,12 +267,9 @@ public class ConfigFrame extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
-        int n = JOptionPane.showConfirmDialog(rootPane, "Los cambios surtiran efecto cuando presiones \"Iniciar\" o reinicies la aplicación.", "Guardar", 2, 2);
-        
-        if (n == 0) {
-            saveProp();
-            this.dispose();
-        }
+        JOptionPane.showMessageDialog(rootPane, "Recuerda presionar el botón de recargar para que los cambios surtan efecto.", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+        saveProp();
+        this.dispose();
 
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -253,11 +287,15 @@ public class ConfigFrame extends javax.swing.JFrame {
     private javax.swing.JTextField captchaKey;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -267,9 +305,11 @@ public class ConfigFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JCheckBox modoAvanzado;
     private javax.swing.JTextField monsterIP;
     private javax.swing.JTextField proxyPass;
     private javax.swing.JTextField proxyUser;
+    private javax.swing.JCheckBox sendProxy;
     // End of variables declaration//GEN-END:variables
 
     public void saveProp() {
@@ -282,6 +322,12 @@ public class ConfigFrame extends javax.swing.JFrame {
         PROP.setProperty("TwoCaptchaKey", captchaKey.getText());
         PROP.setProperty("capMonsterIP", monsterIP.getText());
         PROP.setProperty("alwaysTop", String.valueOf(AlwaysOnTop.isSelected()));
+        PROP.setProperty("advancedMode", String.valueOf(modoAvanzado.isSelected()));
+        PROP.setProperty("limiteBonoRP", String.valueOf(jComboBox1.getSelectedIndex()));
+        PROP.setProperty("limiteBonoBtC", String.valueOf(jComboBox2.getSelectedIndex()));
+        PROP.setProperty("sendProxy",String.valueOf(sendProxy.isSelected()));
+
+        System.out.println(String.valueOf(jComboBox1.getSelectedIndex()));
 
         try {
             PROP.store(new FileWriter(PROP_PATH), "CoinBot");
@@ -316,6 +362,10 @@ public class ConfigFrame extends javax.swing.JFrame {
             bonusRP.setSelected(Boolean.valueOf(PROP.getProperty("bonoRpelectStatus")));
             bonoBTC.setSelected(Boolean.valueOf(PROP.getProperty("bonoBtcSelectStatus")));
             backgroundStatus.setSelected(Boolean.valueOf(PROP.getProperty("backGroundSelectSatatus")));
+            modoAvanzado.setSelected(Boolean.valueOf(PROP.getProperty("advancedMode")));
+            jComboBox1.setSelectedIndex(Integer.parseInt(PROP.getProperty("limiteBonoRP")));
+            jComboBox2.setSelectedIndex(Integer.parseInt(PROP.getProperty("limiteBonoBtC")));
+            sendProxy.setSelected(Boolean.valueOf(PROP.getProperty("sendProxy")));
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ConfigFrame.class.getName()).log(Level.SEVERE, null, ex);

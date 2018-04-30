@@ -23,6 +23,7 @@ public class TwoCaptchaFreeBTC {
     private Properties prop = new Properties();
     private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
             + "\\AppData\\Roaming\\GT Tools\\config.properties";
+    private static boolean sendProxy;
 
     public TwoCaptchaFreeBTC(String proxy, String puerto) throws FileNotFoundException {
 
@@ -36,6 +37,7 @@ public class TwoCaptchaFreeBTC {
             TwoCaptchaFreeBTC.apiKey = prop.getProperty("TwoCaptchaKey");
             TwoCaptchaFreeBTC.proxyUser = prop.getProperty("proxyUser");
             TwoCaptchaFreeBTC.proxyPass = prop.getProperty("proxyPass");
+            TwoCaptchaFreeBTC.sendProxy = Boolean.valueOf(prop.getProperty("sendProxy"));
 
         } catch (IOException ex) {
             Logger.getLogger(TwoCaptchaFreeBTC.class.getName()).log(Level.SEVERE, null, ex);
@@ -44,19 +46,27 @@ public class TwoCaptchaFreeBTC {
 
     public String Tokenizer() {
 
-       if (proxyUser.equals("") && proxyPass.equals("")) {
-          service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, ProxyType.HTTP);
-           System.out.println("usando proxy sin auth");
-       } else if (proxy.contains("0,0,0,0")) {
-           System.out.println("sin proxy");
+        if (sendProxy) {
+
+            if (proxyUser.equals("Usuario") && proxyPass.equals("Contrasena")) {
+                service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, ProxyType.HTTP);
+                System.out.println("usando proxy sin auth");
+            } else if (proxy.contains("0,0,0,0")) {
+                System.out.println("sin proxy");
+                service = new TwoCaptchaService(apiKey, googleKey, pageUrl);
+            } else {
+                System.out.println("usnado proxy con auth");
+                service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, proxyUser, proxyPass, ProxyType.HTTP);
+            }
+        } else {
+            System.out.println("com.freebitcoin.app.control.TwoCaptchaFreeBTC.Tokenizer()");
+            System.out.println("sin proxy");
             service = new TwoCaptchaService(apiKey, googleKey, pageUrl);
-       } else {
-            System.out.println("usnado proxy con auth");
-            service = new TwoCaptchaService(apiKey, googleKey, pageUrl, proxy, puerto, proxyUser, proxyPass, ProxyType.HTTP);
-       }
-        try {    
+        }
+        
+        try {
             responseToken = service.solveCaptcha();
-            
+
             return responseToken;
         } catch (InterruptedException e) {
             System.out.println("ERROR case 1");
@@ -71,4 +81,3 @@ public class TwoCaptchaFreeBTC {
         }
     }
 }
-

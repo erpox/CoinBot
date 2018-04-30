@@ -52,12 +52,13 @@ public class Worker extends SwingWorker<Boolean, String> {
     private final ArrayList<Proxies> proxies;
     private int captchaCount = 1,
             proxySelector;
-    private final String activeCaptchastatus;
+    private int[] procesando;
+    private int[] tipoBono;
 
     public Worker(String perfil, int selector, DefaultTableModel model,
             boolean backGroundStatus, LocalDateTime[] nextRollArray,
             ArrayList<Integer> balanceRollArray, int[] balanceTotalArray,
-            boolean checkBonusRP, boolean checkBonusBTC, ArrayList<Proxies> proxies, String activeCaptchastatus) throws IOException {
+            boolean checkBonusRP, boolean checkBonusBTC, ArrayList<Proxies> proxies, int[] procesando, int[] tipoBono) throws IOException {
 
         this.perfil = perfil;
         this.selector = selector;
@@ -70,8 +71,9 @@ public class Worker extends SwingWorker<Boolean, String> {
         this.checkBonusRP = checkBonusRP;
         this.checkBonusBTC = checkBonusBTC;
         this.proxies = proxies;
-        this.activeCaptchastatus = activeCaptchastatus;
+        this.procesando = procesando;
         this.file = new File("C:\\Program Files\\GT Tools\\geckodriver.exe");
+        this.tipoBono = tipoBono;
     }
 
     @Override
@@ -86,21 +88,24 @@ public class Worker extends SwingWorker<Boolean, String> {
             //rollAction();
             freeRollPlay();
             postear();
-
+            procesando[0] = 0;
             return false;
         } catch (NoSuchSessionException ex) {
+            procesando[0] = 0;
             return false;
         } catch (WebDriverException ex) {
+            procesando[0] = 0;
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
-            model.setValueAt("Ha ocurrido un error", selector, 11);
-            now = LocalDateTime.now().plusMinutes(2);
+            model.setValueAt(" Ha ocurrido un error", selector, 14);
+            now = LocalDateTime.now().plusMinutes(1);
             nextRollArray[selector] = now;
             driver.quit();
             return false;
         } catch (Exception e) {
+            procesando[0] = 0;
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
-            model.setValueAt("Ha ocurrido un error", selector, 11);
-            now = LocalDateTime.now().plusMinutes(2);
+            model.setValueAt(" Ha ocurrido un error", selector, 14);
+            now = LocalDateTime.now().plusMinutes(1);
             nextRollArray[selector] = now;
             driver.quit();
             return false;
@@ -112,7 +117,8 @@ public class Worker extends SwingWorker<Boolean, String> {
     }
 
     protected void Inicializar(String Perfil) throws WebDriverException, InterruptedException {
-        model.setValueAt("Cargando perfil... ", selector, 11);
+        procesando[0] = 1;
+        model.setValueAt(" Cargando perfil... ", selector, 14);
         System.setProperty("webdriver.gecko.driver", file.getAbsolutePath());
         System.setProperty("webdriver.firefox.bin", "C:\\Program Files\\Mozilla Firefox\\firefox.exe");
         System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
@@ -125,10 +131,10 @@ public class Worker extends SwingWorker<Boolean, String> {
         if (BackGroundStatus) {
             options.addArguments("--headless");
         }
-        model.setValueAt("Abriendo navegador...", selector, 11);
+        model.setValueAt(" Abriendo navegador...", selector, 14);
         driver = new FirefoxDriver(options);
         driver.manage().window().maximize();
-        model.setValueAt("Cargando https://freebitco.in/", selector, 11);
+        model.setValueAt(" Cargando https://freebitco.in/", selector, 14);
         try {
             driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
             driver.get("https://freebitco.in");
@@ -140,11 +146,23 @@ public class Worker extends SwingWorker<Boolean, String> {
     }
 
     protected void loadSite() throws InterruptedException, NoSuchSessionException, WebDriverException {
-        balanceBTC = driver.findElement(By.id("balance")).getText();
+        try {
+            balanceBTC = driver.findElement(By.id("balance")).getText();
+        } catch (NoSuchElementException e) {
+            driver.quit();
+            model.setValueAt(" Sesión no iniciada", selector, 14);
+            throw new NoSuchSessionException("No inicio");
+        }
+        String porcentaje = driver.findElement(By.id("fp_bonus_req_completed")).getText().substring(0, 6);
+        model.setValueAt(porcentaje, selector, 4);
         driver.findElement(By.linkText("REWARDS")).click();
         balancePuntos = driver.findElement(By.xpath("//div[@id='rewards_tab']/div[2]/div/div[2]")).getText();
         String newStr = balancePuntos.replace(",", "").trim();
-        balancePuntosParse = Integer.parseInt(newStr);
+        try {
+            balancePuntosParse = Integer.parseInt(newStr);
+        } catch (NumberFormatException e) {
+            balancePuntosParse = 1000;
+        }
         finalPuntos = balancePuntosParse;
         driver.findElement(By.linkText("FREE BTC")).click();
 
@@ -154,7 +172,7 @@ public class Worker extends SwingWorker<Boolean, String> {
             String hora = "";
             try {
                 int minutos = Integer.parseInt(timeRemaining.substring(0, 2).trim());
-                hora = LocalTime.now().plus(minutos + 2, ChronoUnit.MINUTES).format(DateTimeFormatter.ofPattern("hh:mm a"));
+                hora = LocalTime.now().plus(minutos, ChronoUnit.MINUTES).format(DateTimeFormatter.ofPattern("hh:mm a"));
                 now = LocalDateTime.now().plus(minutos, ChronoUnit.MINUTES);
             } catch (NumberFormatException e) {
                 hora = LocalTime.now().plus(5, ChronoUnit.MINUTES).format(DateTimeFormatter.ofPattern("hh:mm a"));
@@ -196,18 +214,24 @@ public class Worker extends SwingWorker<Boolean, String> {
             }
 
             double balanceParse = Double.parseDouble(balanceBTC) * 100000000;
-            model.setValueAt((int) balanceParse, selector, 2);
+            int balance2 = (int) balanceParse;
+            model.setValueAt(String.format("%,d", balance2), selector, 2);
 
             balanceRollArray.add(0);
-            model.setValueAt(balancePuntosParse, selector, 3);
-            model.setValueAt(0, selector, 4);
+            model.setValueAt(String.format("%,d", balancePuntosParse), selector, 3);
             model.setValueAt(0, selector, 5);
-            model.setValueAt(bonusRewarP, selector, 6);
-            model.setValueAt(bonoRPFin, selector, 7);
-            model.setValueAt(bonusFreeBTC, selector, 8);
-            model.setValueAt(bonoBTCFin, selector, 9);
-            model.setValueAt(hora, selector, 10);
-            model.setValueAt("¡Aun no es la hora del Roll!", selector, 11);
+            model.setValueAt(0, selector, 6);
+            model.setValueAt(bonusRewarP, selector, 8);
+            model.setValueAt(bonoRPFin, selector, 9);
+            model.setValueAt(bonusFreeBTC, selector, 11);
+            model.setValueAt(bonoBTCFin, selector, 12);
+            model.setValueAt(hora, selector, 13);
+            if (driver.findElement(By.id("multi_acct_same_ip")).isDisplayed()) {
+
+                model.setValueAt(" IP Compartida", selector, 14);
+            } else {
+                model.setValueAt(" Esperando siguiente ronda", selector, 14);
+            }
 
             balanceTotalArray[selector] = (int) balanceParse;
             driver.quit();
@@ -216,7 +240,8 @@ public class Worker extends SwingWorker<Boolean, String> {
     }
 
     protected void checkBonusPoint() throws InterruptedException {
-        model.setValueAt("Verificando bonos...", selector, 11);
+        model.setValueAt(" Verificando bonos...", selector, 14);
+
         driver.findElement(By.linkText("FREE BTC")).click();
         try {
             String bonu = driver.findElement(By.xpath("//div[@id='bonus_container_free_points']/p/span")).getText().substring(0, 3).trim(); //bonus de puntos
@@ -234,6 +259,9 @@ public class Worker extends SwingWorker<Boolean, String> {
                 bonusRewarP = "No";
                 bonoRPFin = " - ";
             }
+        } catch (StringIndexOutOfBoundsException e) {
+            bonusRewarP = " - ";
+            bonoRPFin = " - ";
         }
     }
 
@@ -251,18 +279,23 @@ public class Worker extends SwingWorker<Boolean, String> {
             }
         } catch (NoSuchElementException e) {
             //     Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
+            System.out.println(bonusRewarP);
+            System.out.println(checkBonusBTC);
             if (checkBonusBTC && bonusRewarP.contains("100")) {
                 activarBonusFreeBTC();
             } else {
                 bonusFreeBTC = "No";
                 bonoBTCFin = " - ";
             }
+        }catch (StringIndexOutOfBoundsException e) {
+             bonusFreeBTC = " - ";
+             bonoBTCFin = " - ";
         }
         return bonusFreeBTC;
     }
 
-    protected String activarBonusPuntos() throws InterruptedException {
-        System.out.println("Activando puntos");
+    protected void activarBonusPuntos() throws InterruptedException {
+        System.out.println(" Activando puntos");
         Thread.sleep(2000);
         try {
             driver.findElement(By.linkText("Got it!")).click();
@@ -270,48 +303,79 @@ public class Worker extends SwingWorker<Boolean, String> {
 
             System.out.println("El banner no esta activo");
         }
+
         if (finalPuntos >= 12 && finalPuntos < 120) {
-            model.setValueAt("Activando Bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[6]/div")).click();//Pestaña Reward Points
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('free_points_1')\"]")).click();
+            activarBonos("//div[@id='rewards_tab']/div[4]/div/div[6]/div",
+                    "//button[@onclick=\"RedeemRPProduct('free_points_1')\"]", bonoRPFin);
             finalPuntos = finalPuntos - 12;
-            bonoRPFin = "24 Hrs";
-            return bonusRewarP = "1 RP";
+            bonusRewarP = "1 RP";
+        }
 
-        } else if (finalPuntos >= 120 && finalPuntos < 600) {
-            model.setValueAt("Activando Bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[6]/div")).click();
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('free_points_10')\"]")).click();
-            finalPuntos = finalPuntos - 120;
-            bonoRPFin = "24 Hrs";
-            return bonusRewarP = "10 RP";
+        switch (tipoBono[0]) {
 
-        } else if (finalPuntos >= 600 && finalPuntos < 1200) {
-            model.setValueAt("Activando Bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[6]/div")).click();
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('free_points_50')\"]")).click();
-            finalPuntos = finalPuntos - 600;
-            bonoRPFin = "24 Hrs";
-            return bonusRewarP = "50 RP";
+            case 0:
 
-        } else if (finalPuntos >= 1200) {
-            model.setValueAt("Activando Bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[6]/div")).click();
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('free_points_100')\"]")).click();
-            finalPuntos = finalPuntos - 1200;
-            bonoRPFin = "24 Hrs";
-            return bonusRewarP = "100 RP";
-        } else {
-            bonoRPFin = " - ";
-            return bonusRewarP = "No";
+                if (finalPuntos >= 1200) {
+
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[6]/div",
+                            "//button[@onclick=\"RedeemRPProduct('free_points_100')\"]", bonoRPFin);
+                    finalPuntos = finalPuntos - 1200;
+                    bonusRewarP = "100 RP";
+
+                } else if (finalPuntos >= 600) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[6]/div",
+                            "//button[@onclick=\"RedeemRPProduct('free_points_50')\"]", bonoRPFin);
+                    finalPuntos = finalPuntos - 600;
+                    bonusRewarP = "50 RP";
+
+                } else if (finalPuntos >= 120) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[6]/div",
+                            "//button[@onclick=\"RedeemRPProduct('free_points_10')\"]", bonoRPFin);
+                    finalPuntos = finalPuntos - 120;
+                    bonusRewarP = "10 RP";
+
+                } else {
+                    bonoRPFin = " - ";
+                    bonusRewarP = "No";
+                }
+
+                break;
+
+            case 1:
+
+                if (finalPuntos >= 600) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[6]/div",
+                            "//button[@onclick=\"RedeemRPProduct('free_points_50')\"]", bonoRPFin);
+                    finalPuntos = finalPuntos - 600;
+                    bonusRewarP = "50 RP";
+                } else if (finalPuntos >= 120) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[6]/div",
+                            "//button[@onclick=\"RedeemRPProduct('free_points_10')\"]", bonoRPFin);
+                    finalPuntos = finalPuntos - 120;
+                    bonusRewarP = "10 RP";
+
+                } else {
+                    bonoRPFin = " - ";
+                    bonusRewarP = "No";
+                }
+                break;
+
+            case 2:
+
+                if (finalPuntos >= 120) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[6]/div",
+                            "//button[@onclick=\"RedeemRPProduct('free_points_10')\"]", bonoRPFin);
+                    finalPuntos = finalPuntos - 120;
+                    bonusRewarP = "10 RP";
+                } else {
+                    bonoRPFin = " - ";
+                    bonusRewarP = "No";
+                }
         }
     }
 
-    protected String activarBonusFreeBTC() throws InterruptedException {
+    protected void activarBonusFreeBTC() throws InterruptedException {
+        model.setValueAt(" Activando bonos", selector, 14);
 
         Thread.sleep(2000);
         try {
@@ -322,59 +386,112 @@ public class Worker extends SwingWorker<Boolean, String> {
         }
 
         if (finalPuntos >= 32 && finalPuntos < 160) { //Bonus de 10%
-            model.setValueAt("Activando bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_10')\"]")).click();
+            activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                    "//button[@onclick=\"RedeemRPProduct('fp_bonus_10')\"]", bonoBTCFin);
             finalPuntos = finalPuntos - 32;
-            bonoBTCFin = "24 Hrs";
-            return bonusFreeBTC = "10%";
-
-        } else if (finalPuntos >= 160 && finalPuntos < 320) {//Bonus de 50%
-            model.setValueAt("Activando bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_50')\"]")).click();
-            finalPuntos = finalPuntos - 160;
-            bonoBTCFin = "24 Hrs";
-            return bonusFreeBTC = "50%";
-
-        } else if (finalPuntos >= 320 && finalPuntos < 1600) {//Bonus100%
-            model.setValueAt("Activando bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_100')\"]")).click();
-            finalPuntos = finalPuntos - 320;
-            bonoBTCFin = "24 Hrs";
-            return bonusFreeBTC = "100%";
-
-        } else if (finalPuntos >= 1600 && finalPuntos < 3200) {
-            model.setValueAt("Activando bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_500')\"]")).click();
-            finalPuntos = finalPuntos - 1600;
-            bonoBTCFin = "24 Hrs";
-            return bonusFreeBTC = "500%";
-        } else if (finalPuntos >= 3200) {
-            model.setValueAt("Activando bonos", selector, 11);
-            driver.findElement(By.linkText("REWARDS")).click();
-            driver.findElement(By.xpath("//div[@id='rewards_tab']/div[4]/div/div[4]/div")).click();//Pestaña Free BTC bonus
-            driver.findElement(By.xpath("//button[@onclick=\"RedeemRPProduct('fp_bonus_1000')\"]")).click();
-            finalPuntos = finalPuntos - 3200;
-            bonoBTCFin = "24 Hrs";
-            return bonusFreeBTC = "1000%";
+            bonusFreeBTC = "10%";
         }
-        bonoBTCFin = " - ";
-        return bonusFreeBTC = "No";
+
+        switch (tipoBono[1]) {
+
+            case 0:
+
+                if (finalPuntos >= 3200) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_1000')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 3200;
+                    bonusFreeBTC = "1000%";
+                } else if (finalPuntos >= 1600) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_500')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 1600;
+                    bonusFreeBTC = "500%";
+
+                } else if (finalPuntos >= 320) {//Bonus100%
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_100')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 320;
+                    bonusFreeBTC = "100%";
+
+                } else if (finalPuntos >= 160) {//Bonus de 50%
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_50')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 160;
+                    bonusFreeBTC = "50%";
+
+                } else {
+                    bonoBTCFin = " - ";
+                    bonusFreeBTC = "No";
+                }
+                break;
+
+            case 1:
+                if (finalPuntos >= 1600) {
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_500')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 1600;
+                    bonusFreeBTC = "500%";
+
+                } else if (finalPuntos >= 320) {//Bonus100%
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_100')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 320;
+                    bonusFreeBTC = "100%";
+
+                } else if (finalPuntos >= 160) {//Bonus de 50%
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_50')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 160;
+                    bonusFreeBTC = "50%";
+
+                } else {
+                    bonoBTCFin = " - ";
+                    bonusFreeBTC = "No";
+                }
+                break;
+
+            case 2:
+
+                if (finalPuntos >= 320) {//Bonus100%
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_100')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 320;
+                    bonusFreeBTC = "100%";
+
+                } else if (finalPuntos >= 160) {//Bonus de 50%
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_50')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 160;
+                    bonusFreeBTC = "50%";
+
+                } else {
+                    bonoBTCFin = " - ";
+                    bonusFreeBTC = "No";
+                }
+                break;
+
+            case 3:
+                if (finalPuntos >= 160) {//Bonus de 50%
+                    activarBonos("//div[@id='rewards_tab']/div[4]/div/div[4]/div",
+                            "//button[@onclick=\"RedeemRPProduct('fp_bonus_50')\"]", bonoBTCFin);
+                    finalPuntos = finalPuntos - 160;
+                    bonusFreeBTC = "50%";
+
+                } else {
+                    bonoBTCFin = " - ";
+                    bonusFreeBTC = "No";
+                }
+                break;
+        }
+
     }
 
     protected void rollAction() throws IOException, InterruptedException, NoSuchSessionException {
-        model.setValueAt("Resolviendo Captcha... Intento " + captchaCount, selector, 11);
+        model.setValueAt(" Resolviendo Captcha... Intento " + captchaCount, selector, 14);
 
         if (captchaCount == 4) {
-            model.setValueAt("CAPTCHA_TIMEOUT", selector, 11);
-            now = LocalDateTime.now().plusMinutes(2);
+            model.setValueAt("CAPTCHA_TIMEOUT", selector, 14);
+            now = LocalDateTime.now().plusMinutes(1);
             nextRollArray[selector] = now;
             driver.quit();
         }
@@ -383,12 +500,12 @@ public class Worker extends SwingWorker<Boolean, String> {
 
         TwoCaptchaFreeBTC prueba = new TwoCaptchaFreeBTC(proxies.get(proxySelector).getProxy(), proxies.get(proxySelector).getPuerto());
         responseToken = prueba.Tokenizer();
-        
+
         if (responseToken.contains("ERROR_WRONG_USER_KEY")) {
-            model.setValueAt("2Captcha API Key invalido", selector, 11);
+            model.setValueAt(" 2Captcha API Key invalido", selector, 14);
             killDriver();
-        } else if (responseToken.contains("ERROR_RECAPTCHA_TIMEOUT") & captchaCount >= 2) {
-            
+        } else if (responseToken.contains("ERROR_RECAPTCHA_TIMEOUT") & captchaCount >= 1) {
+
             do {
                 int range = (model.getRowCount() - 0) + 1;
                 proxySelector = (int) (Math.random() * range + 0);
@@ -396,7 +513,7 @@ public class Worker extends SwingWorker<Boolean, String> {
             } while (proxySelector == selector);
             captchaCount++;
             rollAction();
-            
+
         } else if (responseToken.contains("ERROR_PROXY_BANNED")) {
             do {
                 int range = (model.getRowCount() - 0) + 1;
@@ -417,8 +534,11 @@ public class Worker extends SwingWorker<Boolean, String> {
 
             System.out.println("El banner no esta activo");
         }
-
-        driver.findElement(By.id("free_play_form_button")).click(); // Roll
+        try {
+            driver.findElement(By.id("free_play_form_button")).click(); // Roll
+        } catch (ElementNotInteractableException e) {
+            System.out.println("EL boton de roll no esta interactuable");
+        }
         balanceBTC = driver.findElement(By.id("balance")).getText();
         Thread.sleep(2000);
         if (driver.findElement(By.id("free_play_error")).isDisplayed()) {
@@ -435,7 +555,7 @@ public class Worker extends SwingWorker<Boolean, String> {
                 rollAction();
             } else if (driver.findElement(By.id("free_play_error")).getText().contains("You "
                     + "need to verify your email before you can play the FREE BTC game.")) {
-                model.setValueAt("Necesita verificar email", selector, 11);
+                model.setValueAt(" Necesita verificar email", selector, 14);
                 nextRollArray[selector] = LocalDateTime.now().plusDays(2);
                 driver.quit();
             }
@@ -454,9 +574,8 @@ public class Worker extends SwingWorker<Boolean, String> {
         rewardPointRoll = driver.findElement(By.id("fp_reward_points_won")).getText();
         int rp = Integer.parseInt(rewardPointRoll);
         finalPuntos = finalPuntos + rp;
-        model.setValueAt("¡Roll listo!", selector, 11);
-        model.setValueAt("Esperando siguiente ronda", selector, 11);
-        postear();
+        model.setValueAt("¡Roll listo!", selector, 14);
+        model.setValueAt(" Esperando siguiente ronda", selector, 14);
     }
 
     protected void postear() throws InterruptedException, NoSuchSessionException {
@@ -468,23 +587,24 @@ public class Worker extends SwingWorker<Boolean, String> {
         if (!postRoll.isEmpty()) {
             double balroll = Double.parseDouble(postRoll);
             finall = (balanceParse + balroll) * 100000000;
-            model.setValueAt((int) finall, selector, 2);
+            int balance2 = (int) finall;
+            model.setValueAt(String.format("%,d", balance2), selector, 2);
             balanceRoll = postRoll.replace(".", "0");
-            model.setValueAt(Integer.parseInt(balanceRoll), selector, 4);
+            model.setValueAt(Integer.parseInt(balanceRoll), selector, 5);
 
         } else {
             finall = balanceParse * 100000000;
-            model.setValueAt(0, selector, 4);
+            model.setValueAt(0, selector, 5);
         }
 
-        model.setValueAt(finalPuntos, selector, 3);
-        model.setValueAt(rewardPointRoll, selector, 5);
-        model.setValueAt(bonoRPFin, selector, 7);
-        model.setValueAt(bonoBTCFin, selector, 9);
-        model.setValueAt(bonusRewarP, selector, 6);
-        model.setValueAt(bonusFreeBTC, selector, 8);
+        model.setValueAt(String.format("%,d", finalPuntos), selector, 3);
+        model.setValueAt(rewardPointRoll, selector, 6);
+        model.setValueAt(bonoRPFin, selector, 9);
+        model.setValueAt(bonoBTCFin, selector, 12);
+        model.setValueAt(bonusRewarP, selector, 8);
+        model.setValueAt(bonusFreeBTC, selector, 11);
 
-        model.setValueAt(hora, selector, 10);
+        model.setValueAt(hora, selector, 13);
 
         balanceRollArray.add(Integer.parseInt(balanceRoll));
         nextRollArray[selector] = now;
@@ -496,27 +616,30 @@ public class Worker extends SwingWorker<Boolean, String> {
     protected void ipBaned() throws NoSuchSessionException {
 
         double balanceParse;
+        int balance2;
         if (!balanceBTC.isEmpty()) {
             balanceParse = Double.parseDouble(balanceBTC) * 100000000;
+            balance2 = (int) balanceParse;
             balanceTotalArray[selector] = (int) balanceParse;
-            model.setValueAt((int) balanceParse, selector, 2);
+            model.setValueAt(String.format("%,d", balance2), selector, 2);
         } else {
             balanceParse = 0;
+            balance2 = (int) balanceParse;
             balanceTotalArray[selector] = (int) balanceParse;
             model.setValueAt(0, selector, 2);
         }
         now = LocalDateTime.now().plus(2, ChronoUnit.DAYS);
         balanceRollArray.add(0);
-        model.setValueAt((int) balanceParse, selector, 2);
-        model.setValueAt(0, selector, 3);
+
+        model.setValueAt(String.format("%,d", balance2), selector, 2);
+        model.setValueAt("0", selector, 3);
         model.setValueAt(0, selector, 4);
         model.setValueAt(0, selector, 5);
-        model.setValueAt(bonusRewarP, selector, 6);
-        model.setValueAt(bonoRPFin, selector, 7);
-        model.setValueAt(bonusFreeBTC, selector, 8);
-        model.setValueAt(bonoBTCFin, selector, 9);
-        model.setValueAt("-", selector, 10);
-        model.setValueAt("IP Baneada", selector, 11);
+        model.setValueAt("-", selector, 6);
+        model.setValueAt("-", selector, 8);
+        model.setValueAt("-", selector, 9);
+        model.setValueAt("-", selector, 13);
+        model.setValueAt(" IP Baneada", selector, 14);
         nextRollArray[selector] = now;
         driver.quit();
         driver.findElement(By.id("free_play_form_button")).click();
@@ -524,7 +647,7 @@ public class Worker extends SwingWorker<Boolean, String> {
 
     protected void freeRollPlay() throws NoSuchSessionException, InterruptedException, IOException {
         driver.findElement(By.linkText("FREE BTC")).click();
-        model.setValueAt("Intentando Roll gratis", selector, 11);
+        model.setValueAt(" Intentando Roll gratis", selector, 14);
         try {
             driver.findElement(By.className("g-recaptcha"));
             rollAction();
@@ -559,12 +682,19 @@ public class Worker extends SwingWorker<Boolean, String> {
         rewardPointRoll = driver.findElement(By.id("fp_reward_points_won")).getText();
         int rp = Integer.parseInt(rewardPointRoll);
         finalPuntos = finalPuntos + rp;
-        model.setValueAt("¡Roll listo!", selector, 11);
-        model.setValueAt("Esperando siguiente ronda. Roll gratis.", selector, 11);
+        model.setValueAt(" ¡Roll listo!", selector, 14);
+        model.setValueAt(" Esperando siguiente ronda.", selector, 14);
         postear();
     }
 
     public void killDriver() throws InterruptedException, NoSuchSessionException {
         driver.quit();
+    }
+
+    public void activarBonos(String banner, String bono, String tipoBono) {
+        driver.findElement(By.linkText("REWARDS")).click();
+        driver.findElement(By.xpath(banner)).click();//Pestaña Reward Points
+        driver.findElement(By.xpath(bono)).click();
+        tipoBono = "24 Hrs";
     }
 }
