@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -53,13 +54,15 @@ public class Worker11 {
             proxySelector;
     private int[] procesando;
     private int[] tipoBono;
+    private int[] ticketCount;
+    private boolean comprarTicke;
 
-    public Worker11(String perfil, int selector, DefaultTableModel model,
+    public Worker11(int selector, DefaultTableModel model,
             boolean backGroundStatus, LocalDateTime[] nextRollArray,
             ArrayList<Integer> balanceRollArray, int[] balanceTotalArray,
-            boolean checkBonusRP, boolean checkBonusBTC, ArrayList<Proxies> proxies, int[] procesando, int[] tipoBono) throws IOException {
+            ArrayList<Proxies> proxies, int[] procesando, int[] tipoBono, int[] ticketCount) throws IOException {
 
-        this.perfil = perfil;
+        this.perfil = (String) model.getValueAt(selector, 1);
         this.selector = selector;
         this.proxySelector = selector;
         this.model = model;
@@ -67,37 +70,40 @@ public class Worker11 {
         this.nextRollArray = nextRollArray;
         this.balanceRollArray = balanceRollArray;
         this.balanceTotalArray = balanceTotalArray;
-        this.checkBonusRP = checkBonusRP;
-        this.checkBonusBTC = checkBonusBTC;
+        this.checkBonusRP = (Boolean) model.getValueAt(selector, 7);
+        this.checkBonusBTC = (Boolean) model.getValueAt(selector, 10);
         this.proxies = proxies;
         this.procesando = procesando;
         this.file = new File("C:\\Program Files\\GT Tools\\geckodriver.exe");
         this.tipoBono = tipoBono;
-
+        this.comprarTicke = (boolean) model.getValueAt(selector, 15);
+        this.ticketCount = ticketCount;
+        procesando[10] = 1;
     }
 
-    public boolean run() {
+    public Boolean run() throws Exception {
+
         try {
+
             Inicializar(perfil);
             loadSite();
+            if (comprarTicke) {
+                compraTickets();
+            }
             checkBonusPoint();
             checkBonusFreeBTC();
-            //rollAction();
             freeRollPlay();
             postear();
             procesando[10] = 0;
-            return false;
         } catch (NoSuchSessionException ex) {
             procesando[10] = 0;
-            return false;
         } catch (WebDriverException ex) {
-            procesando[10] = 0;            
+            procesando[10] = 0;
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
             model.setValueAt(" Ha ocurrido un error", selector, 14);
             now = LocalDateTime.now().plusMinutes(1);
             nextRollArray[selector] = now;
             driver.quit();
-            return false;
         } catch (Exception e) {
             procesando[10] = 0;
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
@@ -105,12 +111,30 @@ public class Worker11 {
             now = LocalDateTime.now().plusMinutes(1);
             nextRollArray[selector] = now;
             driver.quit();
-            return false;
+        }
+        return false;
+    }
+
+    protected void compraTickets() {
+        if (ticketCount[selector] == 0) {
+            String cantidadTickets = String.valueOf(tipoBono[2]);
+            driver.findElement(By.linkText("LOTTERY")).click();
+            driver.findElement(By.id("lottery_tickets_purchase_count")).clear();
+            driver.findElement(By.id("lottery_tickets_purchase_count")).sendKeys(cantidadTickets);
+            try {
+                driver.findElement(By.linkText("Got it!")).click();
+            } catch (NoSuchElementException e) {
+
+                System.out.println("El banner no esta activo");
+            }
+            driver.findElement(By.id("purchase_lottery_tickets_button")).click();
+            driver.findElement(By.linkText("FREE BTC")).click();
+            ticketCount[selector] = 1;
         }
     }
 
     protected void Inicializar(String Perfil) throws WebDriverException, InterruptedException {
-        procesando[10] = 1;
+
         model.setValueAt(" Cargando perfil... ", selector, 14);
         System.setProperty("webdriver.gecko.driver", file.getAbsolutePath());
         System.setProperty("webdriver.firefox.bin", "C:\\Program Files\\Mozilla Firefox\\firefox.exe");
@@ -520,7 +544,6 @@ public class Worker11 {
         System.out.println(responseToken);
         JavascriptExecutor jse = (JavascriptExecutor) driver;
         jse.executeScript("document.getElementById('g-recaptcha-response').value='" + responseToken + "';");
-
         try {
             driver.findElement(By.linkText("Got it!")).click();
         } catch (NoSuchElementException e) {
@@ -690,5 +713,4 @@ public class Worker11 {
         driver.findElement(By.xpath(bono)).click();
         tipoBono = "24 Hrs";
     }
-
 }

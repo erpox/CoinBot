@@ -182,7 +182,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
                 Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        new Thread().start();
+        new Thread(this).start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -361,7 +361,7 @@ public class LoginFrame extends javax.swing.JFrame implements Runnable {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ConfigFrame.class
+            java.util.logging.Logger.getLogger(LoginFrame.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }

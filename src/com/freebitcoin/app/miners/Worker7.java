@@ -54,13 +54,15 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             proxySelector;
     private int[] procesando;
     private int[] tipoBono;
+    private int[] ticketCount;
+    private boolean comprarTicke;
 
-    public Worker7(String perfil, int selector, DefaultTableModel model,
+    public Worker7(int selector, DefaultTableModel model,
             boolean backGroundStatus, LocalDateTime[] nextRollArray,
             ArrayList<Integer> balanceRollArray, int[] balanceTotalArray,
-            boolean checkBonusRP, boolean checkBonusBTC, ArrayList<Proxies> proxies, int[] procesando, int[] tipoBono) throws IOException {
+            ArrayList<Proxies> proxies, int[] procesando, int[] tipoBono, int[] ticketCount) throws IOException {
 
-        this.perfil = perfil;
+        this.perfil = (String) model.getValueAt(selector, 1);
         this.selector = selector;
         this.proxySelector = selector;
         this.model = model;
@@ -68,12 +70,15 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         this.nextRollArray = nextRollArray;
         this.balanceRollArray = balanceRollArray;
         this.balanceTotalArray = balanceTotalArray;
-        this.checkBonusRP = checkBonusRP;
-        this.checkBonusBTC = checkBonusBTC;
+        this.checkBonusRP = (Boolean) model.getValueAt(selector, 7);
+        this.checkBonusBTC = (Boolean) model.getValueAt(selector, 10);
         this.proxies = proxies;
         this.procesando = procesando;
         this.file = new File("C:\\Program Files\\GT Tools\\geckodriver.exe");
         this.tipoBono = tipoBono;
+        this.comprarTicke = (boolean) model.getValueAt(selector, 15);
+        this.ticketCount = ticketCount;
+        procesando[6] = 1;
     }
 
     @Override
@@ -83,16 +88,16 @@ public class Worker7 extends SwingWorker<Boolean, String> {
 
             Inicializar(perfil);
             loadSite();
+            if (comprarTicke) {
+                compraTickets();
+            }
             checkBonusPoint();
             checkBonusFreeBTC();
-            //rollAction();
             freeRollPlay();
             postear();
             procesando[6] = 0;
-            return false;
         } catch (NoSuchSessionException ex) {
             procesando[6] = 0;
-            return false;
         } catch (WebDriverException ex) {
             procesando[6] = 0;
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
@@ -100,7 +105,6 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             now = LocalDateTime.now().plusMinutes(1);
             nextRollArray[selector] = now;
             driver.quit();
-            return false;
         } catch (Exception e) {
             procesando[6] = 0;
             Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, e);
@@ -108,16 +112,34 @@ public class Worker7 extends SwingWorker<Boolean, String> {
             now = LocalDateTime.now().plusMinutes(1);
             nextRollArray[selector] = now;
             driver.quit();
-            return false;
         }
+        return false;
     }
 
     @Override
     protected void done() {
     }
 
+    protected void compraTickets() {
+        if (ticketCount[selector] == 0) {
+            String cantidadTickets = String.valueOf(tipoBono[2]);
+            driver.findElement(By.linkText("LOTTERY")).click();
+            driver.findElement(By.id("lottery_tickets_purchase_count")).clear();
+            driver.findElement(By.id("lottery_tickets_purchase_count")).sendKeys(cantidadTickets);
+            try {
+                driver.findElement(By.linkText("Got it!")).click();
+            } catch (NoSuchElementException e) {
+
+                System.out.println("El banner no esta activo");
+            }
+            driver.findElement(By.id("purchase_lottery_tickets_button")).click();
+            driver.findElement(By.linkText("FREE BTC")).click();
+            ticketCount[selector] = 1;
+        }
+    }
+
     protected void Inicializar(String Perfil) throws WebDriverException, InterruptedException {
-        procesando[6] = 1;
+
         model.setValueAt(" Cargando perfil... ", selector, 14);
         System.setProperty("webdriver.gecko.driver", file.getAbsolutePath());
         System.setProperty("webdriver.firefox.bin", "C:\\Program Files\\Mozilla Firefox\\firefox.exe");
@@ -287,9 +309,9 @@ public class Worker7 extends SwingWorker<Boolean, String> {
                 bonusFreeBTC = "No";
                 bonoBTCFin = " - ";
             }
-        }catch (StringIndexOutOfBoundsException e) {
-             bonusFreeBTC = " - ";
-             bonoBTCFin = " - ";
+        } catch (StringIndexOutOfBoundsException e) {
+            bonusFreeBTC = " - ";
+            bonoBTCFin = " - ";
         }
         return bonusFreeBTC;
     }
@@ -527,7 +549,6 @@ public class Worker7 extends SwingWorker<Boolean, String> {
         System.out.println(responseToken);
         JavascriptExecutor jse = (JavascriptExecutor) driver;
         jse.executeScript("document.getElementById('g-recaptcha-response').value='" + responseToken + "';");
-
         try {
             driver.findElement(By.linkText("Got it!")).click();
         } catch (NoSuchElementException e) {

@@ -21,6 +21,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.nio.file.Files;
@@ -30,6 +31,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.TimerTask;
@@ -37,9 +39,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.ExecutionException;
 import java.util.Timer;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -58,7 +57,7 @@ public class MainFrame extends javax.swing.JFrame {
             w9 = 8, w10 = 9, w11 = 10, w12 = 11, pauseN = 0, silentSelector = 0,
             silentSelector2 = 0;
     private int dia = 0;
-    private int[] procesando = new int[14];
+    private final int[] procesando = new int[15];
     private int procesada = 0;
     private File ficheroPerfil2;
     private final DefaultTableModel model;
@@ -81,16 +80,21 @@ public class MainFrame extends javax.swing.JFrame {
             semaforoWorker7 = false, semaforoWorker8 = false, semaforoSilentWorker = false,
             semaforoSilentWorker2 = false, semaforoWorker9 = false, semaforoWorker10 = false, semaforoWorker11 = false;
 
+    private boolean[] pause = new boolean[14];
     private LocalDateTime[] nextRollArray;
-    private ArrayList<Integer> balanceRoll = new ArrayList<>();
+    private final ArrayList<Integer> balanceRoll = new ArrayList<>();
     private int[] balanceTotal;
-    private boolean pause = true;
+    private int[] ticketCount;
     private LocalTime reloj = LocalTime.of(00, 00, 00);
+    private LocalDateTime horaPause;
+    private LocalDateTime buyTicket;
+    private LocalDateTime minHora;
     private final ArrayList<String> proxyRuta = new ArrayList<>();
     private final ArrayList<Proxies> proxies = new ArrayList<>();
     private int[] terminada;
-    private final int[] tipoBono = new int[2];
+    private final int[] tipoBono = new int[3];
     private String[] newProfile;
+    private String montoResidual, porcentajeRetirar;
 
     private final Properties PROP = new Properties();
     private final String PROP_PATH = "C:\\Users\\" + System.getProperty("user.name")
@@ -103,14 +107,11 @@ public class MainFrame extends javax.swing.JFrame {
             openPopUp = false;
     private int workerStatus,
             terminadas = 0,
-            terminadaCheck = 0;
+            terminadaCheck = 0,
+            totalTicket = 0;
     private String btcPriceStr;
     private boolean clean = true;
-    final int corePoolSize = 100;
-    final int maximumPoolSize = 100;
-    final long keepAliveTime = 100000;
-    final TimeUnit unit = TimeUnit.SECONDS;
-    final BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(maximumPoolSize);
+    private int nextStop, stopDuring;
 
     public MainFrame(String user, String pass) throws IOException {
         laf();
@@ -123,6 +124,14 @@ public class MainFrame extends javax.swing.JFrame {
         sheduleSaldos();
         this.user = user;
         this.pass = pass;
+
+        tablaRetiros();
+        ticketCount = new int[model.getRowCount()];
+        jDialog1.setLocationRelativeTo(this);
+        jTable1.getColumn(15).setPreferredWidth(0);
+        jTable1.getColumn(15).setMinWidth(0);
+        jTable1.getColumn(15).setWidth(0);
+        jTable1.getColumn(15).setMaxWidth(0);
     }
 
     @Override
@@ -135,6 +144,78 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPopupMenu1 = new javax.swing.JPopupMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
+        configPane = new javax.swing.JDialog();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        monsterIP = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
+        captchaKey1 = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
+        proxyUser = new javax.swing.JTextField();
+        proxyPass = new javax.swing.JTextField();
+        sendProxy = new javax.swing.JCheckBox();
+        jLabel16 = new javax.swing.JLabel();
+        backgroundStatus = new javax.swing.JCheckBox();
+        jLabel17 = new javax.swing.JLabel();
+        AlwaysOnTop = new javax.swing.JCheckBox();
+        jLabel18 = new javax.swing.JLabel();
+        activeWorkers = new javax.swing.JComboBox<>();
+        jLabel19 = new javax.swing.JLabel();
+        bonusRP = new javax.swing.JCheckBox();
+        bonoBTC = new javax.swing.JCheckBox();
+        jLabel20 = new javax.swing.JLabel();
+        activePause = new javax.swing.JCheckBox();
+        jLabel21 = new javax.swing.JLabel();
+        limiteRP = new javax.swing.JComboBox<>();
+        jLabel22 = new javax.swing.JLabel();
+        limiteBTC = new javax.swing.JComboBox<>();
+        nextPause = new javax.swing.JComboBox<>();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel27 = new javax.swing.JLabel();
+        ticketMonto = new javax.swing.JSpinner();
+        jLabel29 = new javax.swing.JLabel();
+        ticketDia = new javax.swing.JComboBox<>();
+        jButton4 = new javax.swing.JButton();
+        jSeparator3 = new javax.swing.JSeparator();
+        jLabel1 = new javax.swing.JLabel();
+        jSeparator6 = new javax.swing.JSeparator();
+        jLabel28 = new javax.swing.JLabel();
+        jSeparator7 = new javax.swing.JSeparator();
+        jSeparator8 = new javax.swing.JSeparator();
+        jSeparator9 = new javax.swing.JSeparator();
+        jLabel30 = new javax.swing.JLabel();
+        jSeparator10 = new javax.swing.JSeparator();
+        modoAvanzado = new javax.swing.JCheckBox();
+        detenerDurante = new javax.swing.JComboBox<>();
+        jLabel25 = new javax.swing.JLabel();
+        jSeparator11 = new javax.swing.JSeparator();
+        jLabel31 = new javax.swing.JLabel();
+        jSeparator12 = new javax.swing.JSeparator();
+        jRadioButton1 = new javax.swing.JRadioButton();
+        jRadioButton2 = new javax.swing.JRadioButton();
+        jRadioButton3 = new javax.swing.JRadioButton();
+        jRadioButton4 = new javax.swing.JRadioButton();
+        jRadioButton5 = new javax.swing.JRadioButton();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        retiroAutoCheck = new javax.swing.JCheckBox();
+        jLabel32 = new javax.swing.JLabel();
+        jLabel33 = new javax.swing.JLabel();
+        jLabel34 = new javax.swing.JLabel();
+        jLabel35 = new javax.swing.JLabel();
+        jLabel36 = new javax.swing.JLabel();
+        jLabel37 = new javax.swing.JLabel();
+        residualTextFiel = new javax.swing.JTextField();
+        jTextField2 = new javax.swing.JTextField();
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        buttonGroup2 = new javax.swing.ButtonGroup();
+        jDialog1 = new javax.swing.JDialog();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        jLabel38 = new javax.swing.JLabel();
+        jLabel39 = new javax.swing.JLabel();
+        jLabel40 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         LogoLabel = new javax.swing.JLabel();
         EstadoInfo = new javax.swing.JLabel();
@@ -158,7 +239,6 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jButton3 = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTable1 = new MiRenderer();
         jPanel4 = new javax.swing.JPanel();
@@ -174,6 +254,434 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
         jPopupMenu1.add(jMenuItem1);
+
+        configPane.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        configPane.setTitle("Configuración");
+        configPane.setBackground(new java.awt.Color(51, 102, 255));
+        configPane.setLocation(new java.awt.Point(0, 0));
+        configPane.setMinimumSize(new java.awt.Dimension(350, 114));
+        configPane.setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
+        configPane.setName("Configuracón"); // NOI18N
+        configPane.setPreferredSize(new java.awt.Dimension(590, 590));
+        configPane.setResizable(false);
+        configPane.setSize(new java.awt.Dimension(590, 590));
+        configPane.getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel3.setBackground(new java.awt.Color(0, 120, 215));
+        jPanel3.setPreferredSize(new java.awt.Dimension(560, 455));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel5.setBackground(new java.awt.Color(51, 51, 51));
+        jPanel5.setPreferredSize(new java.awt.Dimension(570, 610));
+        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel12.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel12.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/capmonsterminipng.png"))); // NOI18N
+        jLabel12.setText("Software IP:");
+        jLabel12.setToolTipText("<html>IP del servidor donde esta corriendo CapMonster.<br> Si CapMonster esta en el mismo computador no modifiques este campo.</html>");
+        jPanel5.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(19, 51, -1, -1));
+
+        monsterIP.setBackground(new java.awt.Color(51, 51, 51));
+        monsterIP.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
+        monsterIP.setForeground(new java.awt.Color(220, 220, 220));
+        monsterIP.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        monsterIP.setText("127.0.0.3");
+        monsterIP.setToolTipText("");
+        monsterIP.setPreferredSize(new java.awt.Dimension(120, 23));
+        jPanel5.add(monsterIP, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 50, -1, -1));
+
+        jLabel14.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel14.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Key_20px.png"))); // NOI18N
+        jLabel14.setText("Software Key:");
+        jLabel14.setToolTipText("Si activas la protección en CapMonster, coloca tu clave aqui");
+        jPanel5.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(294, 51, 130, -1));
+
+        captchaKey1.setBackground(new java.awt.Color(51, 51, 51));
+        captchaKey1.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
+        captchaKey1.setForeground(new java.awt.Color(220, 220, 220));
+        captchaKey1.setText("1234567890aAbBcC");
+        captchaKey1.setToolTipText("");
+        jPanel5.add(captchaKey1, new org.netbeans.lib.awtextra.AbsoluteConstraints(428, 50, 130, -1));
+
+        jLabel15.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Firewall_20px.png"))); // NOI18N
+        jLabel15.setText("Proxy:");
+        jLabel15.setToolTipText("Si tu servicio usa Autenticación por IP no modifiques estos campos");
+        jPanel5.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(19, 91, -1, -1));
+
+        proxyUser.setBackground(new java.awt.Color(51, 51, 51));
+        proxyUser.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
+        proxyUser.setForeground(new java.awt.Color(220, 220, 220));
+        proxyUser.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        proxyUser.setText("Usuario");
+        proxyUser.setToolTipText("<html>Usuario de tu servicio de proxy.<br> Asegurate de que no contenga espacios.</html>");
+        jPanel5.add(proxyUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(89, 91, 90, -1));
+
+        proxyPass.setBackground(new java.awt.Color(51, 51, 51));
+        proxyPass.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
+        proxyPass.setForeground(new java.awt.Color(220, 220, 220));
+        proxyPass.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        proxyPass.setText("Contraseña");
+        proxyPass.setToolTipText("<html>Contraseña de tu servicio de proxy.<br> Asegurate de que no contenga espacios.</html>");
+        jPanel5.add(proxyPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(189, 92, 90, -1));
+
+        sendProxy.setBackground(new java.awt.Color(51, 51, 51));
+        sendProxy.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        sendProxy.setForeground(new java.awt.Color(255, 255, 255));
+        sendProxy.setText("Enviar Proxy al Software");
+        sendProxy.setToolTipText("<html>Enviar los proxy directamente a CapMonster.<br> Si desactivas esta opción asegurare de indicar tu lista de proxy a CapMonster</html>");
+        jPanel5.add(sendProxy, new org.netbeans.lib.awtextra.AbsoluteConstraints(297, 91, -1, -1));
+
+        jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Hide_20px.png"))); // NOI18N
+        jPanel5.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(225, 330, -1, -1));
+
+        backgroundStatus.setBackground(new java.awt.Color(51, 51, 51));
+        backgroundStatus.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        backgroundStatus.setForeground(new java.awt.Color(255, 255, 255));
+        backgroundStatus.setText("Segundo Plano");
+        backgroundStatus.setToolTipText("Oculta las ventanas de Firefox");
+        jPanel5.add(backgroundStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(245, 330, -1, 20));
+
+        jLabel17.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_iMac_20px.png"))); // NOI18N
+        jPanel5.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(429, 330, -1, -1));
+
+        AlwaysOnTop.setBackground(new java.awt.Color(51, 51, 51));
+        AlwaysOnTop.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        AlwaysOnTop.setForeground(new java.awt.Color(255, 255, 255));
+        AlwaysOnTop.setText("Fijar ventana");
+        AlwaysOnTop.setToolTipText("Fija la ventana de CoinBOT sobre todas las demas.");
+        AlwaysOnTop.setBorder(null);
+        jPanel5.add(AlwaysOnTop, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 330, -1, -1));
+
+        jLabel18.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Workers_20px.png"))); // NOI18N
+        jLabel18.setText("Mineros:");
+        jLabel18.setToolTipText("Selecciona la cantidad de Mineros que usaras.");
+        jPanel5.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(19, 330, 80, -1));
+
+        activeWorkers.setFont(new java.awt.Font("Microsoft JhengHei", 0, 12)); // NOI18N
+        activeWorkers.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" }));
+        activeWorkers.setToolTipText("");
+        jPanel5.add(activeWorkers, new org.netbeans.lib.awtextra.AbsoluteConstraints(122, 330, -1, 20));
+
+        jLabel19.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Star_Filled_20px.png"))); // NOI18N
+        jPanel5.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(21, 172, -1, -1));
+
+        bonusRP.setBackground(new java.awt.Color(51, 51, 51));
+        bonusRP.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        bonusRP.setForeground(new java.awt.Color(255, 255, 255));
+        bonusRP.setText("Reward Point");
+        jPanel5.add(bonusRP, new org.netbeans.lib.awtextra.AbsoluteConstraints(43, 172, -1, 20));
+
+        bonoBTC.setBackground(new java.awt.Color(51, 51, 51));
+        bonoBTC.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        bonoBTC.setForeground(new java.awt.Color(255, 255, 255));
+        bonoBTC.setText("Bono BTC");
+        jPanel5.add(bonoBTC, new org.netbeans.lib.awtextra.AbsoluteConstraints(254, 172, 90, 20));
+
+        jLabel20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Loyalty_Card_20px.png"))); // NOI18N
+        jPanel5.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(234, 172, -1, -1));
+
+        activePause.setBackground(new java.awt.Color(51, 51, 51));
+        activePause.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        activePause.setForeground(new java.awt.Color(255, 255, 255));
+        activePause.setText("Pausar automaticamente cada");
+        activePause.setToolTipText("Pausa CoinBOT durante un tiempo determinado para sincronizar las horas");
+        activePause.setActionCommand("Habilitar");
+        activePause.setPreferredSize(new java.awt.Dimension(119, 17));
+        jPanel5.add(activePause, new org.netbeans.lib.awtextra.AbsoluteConstraints(39, 369, 208, -1));
+
+        jLabel21.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel21.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel21.setText("Limite Reward Point: ");
+        jLabel21.setToolTipText("<html>Establece un limite de bonos RP.<br> Se activaran todos los bonos por debajo de este limite, incluyendo el que indiques</html>");
+        jPanel5.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(21, 211, -1, -1));
+
+        limiteRP.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "100 RP", "50 RP", "10 RP", "1 RP" }));
+        limiteRP.setToolTipText("");
+        jPanel5.add(limiteRP, new org.netbeans.lib.awtextra.AbsoluteConstraints(149, 210, 60, -1));
+
+        jLabel22.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel22.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel22.setText("Limite Bono BTC: ");
+        jLabel22.setToolTipText("<html>Establece un limite de bonos BTC.<br> Se activaran todos los bonos por debajo de este limite, incluyendo el que indiques</html>");
+        jPanel5.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(227, 211, -1, -1));
+
+        limiteBTC.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1000%", "500%", "100%", "50%", "10%" }));
+        jPanel5.add(limiteBTC, new org.netbeans.lib.awtextra.AbsoluteConstraints(334, 210, -1, -1));
+
+        nextPause.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "3 Horas", "6 Horas", "12 Horas", "24 Horas" }));
+        jPanel5.add(nextPause, new org.netbeans.lib.awtextra.AbsoluteConstraints(249, 368, -1, -1));
+
+        jLabel24.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel24.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel24.setText("Durante:");
+        jPanel5.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(327, 369, -1, -1));
+
+        jLabel27.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel27.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel27.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Buy_20px.png"))); // NOI18N
+        jLabel27.setText("Automprar");
+        jLabel27.setToolTipText("Si deseas compprar Tickets periodicamente indica la cantidad y el tiempo entre compras. De lo contrario dejalo en 0");
+        jPanel5.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(21, 254, -1, -1));
+
+        ticketMonto.setModel(new javax.swing.SpinnerNumberModel(0, null, null, 25));
+        jPanel5.add(ticketMonto, new org.netbeans.lib.awtextra.AbsoluteConstraints(149, 254, 60, -1));
+
+        jLabel29.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel29.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel29.setText("Tickets cada");
+        jPanel5.add(jLabel29, new org.netbeans.lib.awtextra.AbsoluteConstraints(227, 255, -1, -1));
+
+        ticketDia.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1 Dia", "2 Dias", "3 Dias", "7 Dias" }));
+        jPanel5.add(ticketDia, new org.netbeans.lib.awtextra.AbsoluteConstraints(334, 254, 60, -1));
+
+        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Checked_25px.png"))); // NOI18N
+        jButton4.setBorder(null);
+        jButton4.setBorderPainted(false);
+        jButton4.setContentAreaFilled(false);
+        jButton4.setFocusable(false);
+        jButton4.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Checked_25px_1.png"))); // NOI18N
+        jButton4.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Checked_25px_1.png"))); // NOI18N
+        jButton4.setRolloverSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Checked_25px_1.png"))); // NOI18N
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 517, -1, -1));
+        jPanel5.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 22, 210, 10));
+
+        jLabel1.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Servicio Captcha");
+        jPanel5.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 12, -1, -1));
+        jPanel5.add(jSeparator6, new org.netbeans.lib.awtextra.AbsoluteConstraints(353, 144, 210, 10));
+
+        jLabel28.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
+        jLabel28.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel28.setText(" Bonos y Tickets");
+        jPanel5.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 134, 114, -1));
+        jPanel5.add(jSeparator7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 144, 210, 10));
+        jPanel5.add(jSeparator8, new org.netbeans.lib.awtextra.AbsoluteConstraints(353, 21, 210, 11));
+        jPanel5.add(jSeparator9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 302, 176, 10));
+
+        jLabel30.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
+        jLabel30.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel30.setText(" Configuraciones Generales");
+        jPanel5.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 292, -1, -1));
+        jPanel5.add(jSeparator10, new org.netbeans.lib.awtextra.AbsoluteConstraints(389, 302, 176, 10));
+
+        modoAvanzado.setBackground(new java.awt.Color(51, 51, 51));
+        modoAvanzado.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        modoAvanzado.setForeground(new java.awt.Color(255, 255, 255));
+        modoAvanzado.setText("Tabla Avanzada");
+        modoAvanzado.setToolTipText("Muestra 3 Columnas extras en la tabla.");
+        modoAvanzado.setPreferredSize(new java.awt.Dimension(119, 17));
+        jPanel5.add(modoAvanzado, new org.netbeans.lib.awtextra.AbsoluteConstraints(418, 174, 130, -1));
+
+        detenerDurante.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "10 Minutos", "20 Minutos", "30 Minutos", "40 Minutos", "50 Minutos", "60 Minutos" }));
+        jPanel5.add(detenerDurante, new org.netbeans.lib.awtextra.AbsoluteConstraints(383, 368, -1, -1));
+
+        jLabel25.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Private_20px.png"))); // NOI18N
+        jPanel5.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(19, 368, -1, -1));
+        jPanel5.add(jSeparator11, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 416, 205, 10));
+
+        jLabel31.setFont(new java.awt.Font("Microsoft JhengHei", 1, 14)); // NOI18N
+        jLabel31.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel31.setText("Retiro Automático");
+        jPanel5.add(jLabel31, new org.netbeans.lib.awtextra.AbsoluteConstraints(225, 406, -1, -1));
+        jPanel5.add(jSeparator12, new org.netbeans.lib.awtextra.AbsoluteConstraints(359, 416, 206, 10));
+
+        jRadioButton1.setBackground(new java.awt.Color(51, 51, 51));
+        buttonGroup1.add(jRadioButton1);
+        jRadioButton1.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jRadioButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jRadioButton1.setText("Lento");
+        jRadioButton1.setToolTipText(" Duración: 6-24 Horas");
+        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton1ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jRadioButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(208, 463, -1, -1));
+
+        jRadioButton2.setBackground(new java.awt.Color(51, 51, 51));
+        buttonGroup1.add(jRadioButton2);
+        jRadioButton2.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jRadioButton2.setForeground(new java.awt.Color(255, 255, 255));
+        jRadioButton2.setText("Instantaneo");
+        jRadioButton2.setToolTipText("Duración: ~15 Minutos");
+        jPanel5.add(jRadioButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(208, 490, -1, -1));
+
+        jRadioButton3.setBackground(new java.awt.Color(51, 51, 51));
+        buttonGroup2.add(jRadioButton3);
+        jRadioButton3.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jRadioButton3.setForeground(new java.awt.Color(255, 255, 255));
+        jRadioButton3.setText("Todo");
+        jRadioButton3.setToolTipText("Retira Todo el balance de tus cuentas");
+        jRadioButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton3ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jRadioButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(353, 465, 77, -1));
+
+        jRadioButton4.setBackground(new java.awt.Color(51, 51, 51));
+        buttonGroup2.add(jRadioButton4);
+        jRadioButton4.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jRadioButton4.setForeground(new java.awt.Color(255, 255, 255));
+        jRadioButton4.setText("Porcentual");
+        jRadioButton4.setToolTipText("Establece el porcentaje del Saldo que deseas retirar de tu cuenta");
+        jRadioButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton4ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jRadioButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(353, 492, -1, -1));
+
+        jRadioButton5.setBackground(new java.awt.Color(51, 51, 51));
+        buttonGroup2.add(jRadioButton5);
+        jRadioButton5.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jRadioButton5.setForeground(new java.awt.Color(255, 255, 255));
+        jRadioButton5.setText("Residual");
+        jRadioButton5.setToolTipText("Establece la cantidad que deseas mantener en tu cuenta. El resto será retirado a la cartera que indiques");
+        jRadioButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton5ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jRadioButton5, new org.netbeans.lib.awtextra.AbsoluteConstraints(353, 517, 77, -1));
+
+        jLabel23.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel23.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel23.setText("Tipo de Retiro");
+        jPanel5.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(196, 444, -1, -1));
+
+        jLabel26.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jLabel26.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel26.setText("Cantidad ");
+        jPanel5.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(344, 444, -1, -1));
+
+        retiroAutoCheck.setBackground(new java.awt.Color(51, 51, 51));
+        retiroAutoCheck.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        retiroAutoCheck.setForeground(new java.awt.Color(255, 255, 255));
+        retiroAutoCheck.setText("Habilitar Retiro");
+        retiroAutoCheck.setToolTipText("");
+        retiroAutoCheck.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                retiroAutoCheckActionPerformed(evt);
+            }
+        });
+        jPanel5.add(retiroAutoCheck, new org.netbeans.lib.awtextra.AbsoluteConstraints(38, 444, -1, -1));
+
+        jLabel32.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Initiate_Money_Transfer_20px.png"))); // NOI18N
+        jPanel5.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(18, 444, -1, -1));
+
+        jLabel33.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Turtle_20px.png"))); // NOI18N
+        jPanel5.add(jLabel33, new org.netbeans.lib.awtextra.AbsoluteConstraints(188, 468, -1, -1));
+
+        jLabel34.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Quick_Mode_On_20px.png"))); // NOI18N
+        jPanel5.add(jLabel34, new org.netbeans.lib.awtextra.AbsoluteConstraints(188, 495, -1, -1));
+
+        jLabel35.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Full_Battery_20px.png"))); // NOI18N
+        jPanel5.add(jLabel35, new org.netbeans.lib.awtextra.AbsoluteConstraints(333, 470, -1, -1));
+
+        jLabel36.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Charged_Battery_20px.png"))); // NOI18N
+        jPanel5.add(jLabel36, new org.netbeans.lib.awtextra.AbsoluteConstraints(333, 491, -1, -1));
+
+        jLabel37.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Low_Battery_20px.png"))); // NOI18N
+        jPanel5.add(jLabel37, new org.netbeans.lib.awtextra.AbsoluteConstraints(333, 517, -1, -1));
+
+        residualTextFiel.setBackground(new java.awt.Color(51, 51, 51));
+        residualTextFiel.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        residualTextFiel.setForeground(new java.awt.Color(255, 255, 255));
+        residualTextFiel.setText("ej. 3000");
+        jPanel5.add(residualTextFiel, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 520, 70, -1));
+
+        jTextField2.setBackground(new java.awt.Color(51, 51, 51));
+        jTextField2.setFont(new java.awt.Font("Microsoft JhengHei", 1, 12)); // NOI18N
+        jTextField2.setForeground(new java.awt.Color(255, 255, 255));
+        jTextField2.setText("ej. 95%");
+        jPanel5.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 487, 70, -1));
+
+        jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(5, 5, 573, 550));
+
+        configPane.getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 585, 564));
+
+        configPane.getAccessibleContext().setAccessibleParent(this);
+
+        jDialog1.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        jDialog1.setAlwaysOnTop(true);
+        jDialog1.setMinimumSize(new java.awt.Dimension(330, 79));
+        jDialog1.setUndecorated(true);
+        jDialog1.setPreferredSize(new java.awt.Dimension(330, 79));
+        jDialog1.setSize(new java.awt.Dimension(330, 79));
+        jDialog1.setType(java.awt.Window.Type.POPUP);
+
+        jPanel6.setBackground(new java.awt.Color(0, 120, 215));
+        jPanel6.setMinimumSize(new java.awt.Dimension(348, 78));
+
+        jLabel13.setFont(new java.awt.Font("Microsoft JhengHei", 1, 16)); // NOI18N
+        jLabel13.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel13.setText("CoinBOT se ha pausado. ");
+
+        jLabel38.setFont(new java.awt.Font("Microsoft JhengHei", 1, 16)); // NOI18N
+        jLabel38.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel38.setText("Se renaudara a las");
+
+        jLabel39.setFont(new java.awt.Font("Microsoft JhengHei", 1, 16)); // NOI18N
+        jLabel39.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel39.setText("08:30PM");
+
+        jLabel40.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Notification_54px_1.png"))); // NOI18N
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addComponent(jLabel40)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel13)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel38)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel39))))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(11, 11, 11)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel40)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel13)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel38)
+                            .addComponent(jLabel39))))
+                .addGap(14, 14, 14))
+        );
+
+        javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
+        jDialog1.getContentPane().setLayout(jDialog1Layout);
+        jDialog1Layout.setHorizontalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 330, Short.MAX_VALUE)
+        );
+        jDialog1Layout.setVerticalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
+        jDialog1.getAccessibleContext().setAccessibleParent(this);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("CoinBot v1.4");
@@ -295,19 +803,6 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Bitcoin_20px.png"))); // NOI18N
         jLabel6.setText("1 BTC ~ 0 $");
 
-        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Refresh_25px.png"))); // NOI18N
-        jButton3.setBorder(null);
-        jButton3.setContentAreaFilled(false);
-        jButton3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButton3.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Refresh_25px_1.png"))); // NOI18N
-        jButton3.setRolloverSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Refresh_25px_1.png"))); // NOI18N
-        jButton3.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/com/freebitcoin/app/images/icons8_Refresh_25px_1.png"))); // NOI18N
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -350,9 +845,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
-                .addComponent(jButton3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -367,7 +860,6 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(jLabel10)
                     .addComponent(jLabel8)
-                    .addComponent(jButton3)
                     .addComponent(jLabel7)
                     .addComponent(jButton1)
                     .addGroup(jPanel2Layout.createSequentialGroup()
@@ -405,7 +897,8 @@ public class MainFrame extends javax.swing.JFrame {
                 "<html><center>Bono<br>BTC</center></html>",
                 "<html><center>Bono BTC<br>FIN</center></html>",
                 "<html><center>Prox.<br>Roll</center></html>",
-                "Estado"
+                "Estado",
+                "Tickets",
             }
         ) {
             Class[] types = new Class [] {
@@ -452,10 +945,12 @@ public class MainFrame extends javax.swing.JFrame {
 
                 ,
                 java.lang.String.class
+                ,
+                java.lang.Boolean.class
 
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, true, false, false, true, false, false, false, false
+                false, false, false, false, false, false, false, true, false, false, true, false, false, false, false,false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -495,33 +990,6 @@ public class MainFrame extends javax.swing.JFrame {
         jTable1.setSelectionForeground(new java.awt.Color(0, 0, 0));
         jTable1.setSortable(false);
         jScrollPane3.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(25);
-            jTable1.getColumnModel().getColumn(1).setPreferredWidth(80);
-            jTable1.getColumnModel().getColumn(2).setPreferredWidth(70);
-            jTable1.getColumnModel().getColumn(3).setPreferredWidth(50);
-            jTable1.getColumnModel().getColumn(4).setResizable(false);
-            jTable1.getColumnModel().getColumn(4).setPreferredWidth(45);
-            jTable1.getColumnModel().getColumn(5).setResizable(false);
-            jTable1.getColumnModel().getColumn(5).setPreferredWidth(35);
-            jTable1.getColumnModel().getColumn(6).setResizable(false);
-            jTable1.getColumnModel().getColumn(6).setPreferredWidth(35);
-            jTable1.getColumnModel().getColumn(7).setResizable(false);
-            jTable1.getColumnModel().getColumn(7).setPreferredWidth(30);
-            jTable1.getColumnModel().getColumn(8).setResizable(false);
-            jTable1.getColumnModel().getColumn(8).setPreferredWidth(45);
-            jTable1.getColumnModel().getColumn(9).setResizable(false);
-            jTable1.getColumnModel().getColumn(9).setPreferredWidth(45);
-            jTable1.getColumnModel().getColumn(10).setResizable(false);
-            jTable1.getColumnModel().getColumn(10).setPreferredWidth(30);
-            jTable1.getColumnModel().getColumn(11).setResizable(false);
-            jTable1.getColumnModel().getColumn(11).setPreferredWidth(50);
-            jTable1.getColumnModel().getColumn(12).setResizable(false);
-            jTable1.getColumnModel().getColumn(12).setPreferredWidth(50);
-            jTable1.getColumnModel().getColumn(13).setResizable(false);
-            jTable1.getColumnModel().getColumn(13).setPreferredWidth(60);
-            jTable1.getColumnModel().getColumn(14).setPreferredWidth(200);
-        }
 
         jPanel4.setBackground(new java.awt.Color(0, 120, 215));
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -585,11 +1053,14 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(EstadoInfo)
                 .addGap(6, 6, 6)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labelSesion1)
-                    .addComponent(labelBalancetotal))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(LogoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(labelBalancetotal)
+                        .addGap(10, 10, 10))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(labelSesion1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(LogoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addComponent(jScrollPane3)
@@ -597,21 +1068,20 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(EstadoInfo)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(80, 80, 80)
-                                .addComponent(labelSesion1)
-                                .addGap(0, 0, 0)
-                                .addComponent(labelBalancetotal)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(EstadoInfo)
                         .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addGap(21, 21, 21)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addGap(80, 80, 80)
+                                    .addComponent(labelSesion1))
+                                .addComponent(LogoLabel))
+                            .addGap(0, 0, 0)
+                            .addComponent(labelBalancetotal)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(LogoLabel)))
+                        .addGap(24, 24, 24)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 534, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -647,16 +1117,28 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        new ConfigFrame().setVisible(true);
+        configPane.setLocationRelativeTo(this);
+        configPane.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void BotonPauseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonPauseActionPerformed
         if (pauseN == 0) {
-            pause = false;
+
+            for (int i = 0; i < pause.length; i++) {
+                pause[i] = false;
+
+            }
             pauseN = 1;
             BotonPause.setSelected(true);
         } else {
-            pause = true;
+            for (int i = 0; i < pause.length; i++) {
+                pause[i] = true;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             pauseN = 0;
             BotonPause.setSelected(false);
         }
@@ -664,7 +1146,6 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void botonIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonIniciarActionPerformed
 
-        System.out.println(workerStatus);
         switch (workerStatus) {
             case 1:
                 runWorker1();
@@ -758,7 +1239,7 @@ public class MainFrame extends javax.swing.JFrame {
                 hiddenWorker2();
                 break;
         }
-        
+        horaPause = LocalDateTime.now().plusHours(nextStop);
         Sesionreloj();
         statusBar();
         botonBorrarPerfil.setEnabled(false);
@@ -803,9 +1284,57 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_formWindowClosing
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        configPane.dispose();
+        saveProperties();
         properties();
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
+        jDialog1.setLocationRelativeTo(this);
+        jDialog1.setVisible(true);
+    }//GEN-LAST:event_jRadioButton1ActionPerformed
+
+    private void jRadioButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton5ActionPerformed
+        jTextField2.setVisible(false);
+        residualTextFiel.setVisible(true);
+    }//GEN-LAST:event_jRadioButton5ActionPerformed
+
+    private void retiroAutoCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_retiroAutoCheckActionPerformed
+        if (retiroAutoCheck.isSelected()) {
+            jRadioButton1.setEnabled(true);
+            jRadioButton2.setEnabled(true);
+            jRadioButton3.setEnabled(true);
+            jRadioButton4.setEnabled(true);
+            jRadioButton5.setEnabled(true);
+            jLabel33.setEnabled(true);
+            jLabel34.setEnabled(true);
+            jLabel35.setEnabled(true);
+            jLabel36.setEnabled(true);
+            jLabel37.setEnabled(true);
+        } else {
+            jRadioButton1.setEnabled(false);
+            jRadioButton2.setEnabled(false);
+            jRadioButton3.setEnabled(false);
+            jRadioButton4.setEnabled(false);
+            jRadioButton5.setEnabled(false);
+            jLabel33.setEnabled(false);
+            jLabel34.setEnabled(false);
+            jLabel35.setEnabled(false);
+            jLabel36.setEnabled(false);
+            jLabel37.setEnabled(false);
+        }
+    }//GEN-LAST:event_retiroAutoCheckActionPerformed
+
+    private void jRadioButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton4ActionPerformed
+        jTextField2.setVisible(true);
+        residualTextFiel.setVisible(false);
+    }//GEN-LAST:event_jRadioButton4ActionPerformed
+
+    private void jRadioButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton3ActionPerformed
+        jTextField2.setVisible(false);
+        residualTextFiel.setVisible(false);
+    }//GEN-LAST:event_jRadioButton3ActionPerformed
 
     public static void main(String args[]) {
 
@@ -829,20 +1358,62 @@ public class MainFrame extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox AlwaysOnTop;
     private javax.swing.JButton BotonPause;
     public javax.swing.JLabel EstadoInfo;
     private javax.swing.JLabel LogoLabel;
+    private javax.swing.JCheckBox activePause;
+    private javax.swing.JComboBox<String> activeWorkers;
+    private javax.swing.JCheckBox backgroundStatus;
+    private javax.swing.JCheckBox bonoBTC;
+    private javax.swing.JCheckBox bonusRP;
     private javax.swing.JButton botonBorrarPerfil;
     private javax.swing.JButton botonIniciar;
     private javax.swing.JLabel btcPriiceLabel;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.ButtonGroup buttonGroup2;
+    private javax.swing.JTextField captchaKey1;
+    private javax.swing.JDialog configPane;
+    private javax.swing.JComboBox<String> detenerDurante;
     private javax.swing.JLabel esperaLabel;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JDialog jDialog1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
+    private javax.swing.JLabel jLabel38;
+    private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel40;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -851,15 +1422,44 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JRadioButton jRadioButton1;
+    private javax.swing.JRadioButton jRadioButton2;
+    private javax.swing.JRadioButton jRadioButton3;
+    private javax.swing.JRadioButton jRadioButton4;
+    private javax.swing.JRadioButton jRadioButton5;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JSeparator jSeparator10;
+    private javax.swing.JSeparator jSeparator11;
+    private javax.swing.JSeparator jSeparator12;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator6;
+    private javax.swing.JSeparator jSeparator7;
+    private javax.swing.JSeparator jSeparator8;
+    private javax.swing.JSeparator jSeparator9;
     private org.jdesktop.swingx.JXTable jTable1;
+    private javax.swing.JTextField jTextField2;
     private javax.swing.JLabel labelBalancetotal;
     private javax.swing.JLabel labelSesion1;
+    private javax.swing.JComboBox<String> limiteBTC;
+    private javax.swing.JComboBox<String> limiteRP;
+    private javax.swing.JCheckBox modoAvanzado;
+    private javax.swing.JTextField monsterIP;
+    private javax.swing.JComboBox<String> nextPause;
     private javax.swing.JLabel procesandoLabel;
+    private javax.swing.JTextField proxyPass;
+    private javax.swing.JTextField proxyUser;
     private javax.swing.JLabel relojLabel;
+    private javax.swing.JTextField residualTextFiel;
+    private javax.swing.JCheckBox retiroAutoCheck;
+    private javax.swing.JCheckBox sendProxy;
     private javax.swing.JLabel terminadasLabel;
+    private javax.swing.JComboBox<String> ticketDia;
+    private javax.swing.JSpinner ticketMonto;
     private javax.swing.JLabel totalPerfilesLabel;
     // End of variables declaration//GEN-END:variables
 
@@ -886,20 +1486,54 @@ public class MainFrame extends javax.swing.JFrame {
             @Override
             public void run() {
 
-                if (pause) {
+                reloj = reloj.plusSeconds(1);
+                jLabel4.setText(reloj.toString());
+                if (reloj.isAfter(LocalTime.of(23, 59, 58))) {
+                    dia++;
+                    relojLabel.setText(dia + " dia");
+                }
+                if (activePause.isSelected()) {
+                    //Pausa periodica del bot
+                    if (LocalDateTime.now().isAfter(horaPause)) {
+                        try {
+                            for (int i = 0; i < pause.length; i++) {
+                                pause[i] = false;
+                            }
 
-                    reloj = reloj.plusSeconds(1);
-                    jLabel4.setText(reloj.toString());
-                    if (reloj.isAfter(LocalTime.of(23, 59, 58))) {
-                        dia++;
-                        relojLabel.setText(dia + " dia");
+                            jLabel39.setText(LocalDateTime.now().plusMinutes(stopDuring / 60000).format(DateTimeFormatter.ofPattern("hh:mm a")));
+                            horaPause = LocalDateTime.now().plusHours(nextStop);
+                            jDialog1.setVisible(true);
+                            Thread.sleep(stopDuring);
+                            jDialog1.setVisible(false);
+                            for (int i = 0; i < pause.length; i++) {
+                                pause[i] = true;
+                                Thread.sleep(500);
+                            }
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
-
+                }
+                //Auto compra de tickets
+                if (LocalDateTime.now().isAfter(buyTicket)) {
+                    for (int i = 0; i < model.getRowCount(); i++) {
+                        model.setValueAt(true, i, 15);
+                        totalTicket = totalTicket + ticketCount[i];
+                    }
+                    if (totalTicket >= model.getRowCount()) {
+                        //se actualiza la hora de compra de tikects y se desactiva
+                        for (int i = 0; i < model.getRowCount(); i++) {
+                            model.setValueAt(false, i, 15);
+                        }
+                    }
                 }
             }
+
         ;
-        };
-timerReloj.schedule(ttReloj, 1000, 1000);
+        }
+            ;
+            timerReloj.schedule(ttReloj,
+                1000, 1000);
     }
 
     private void statusBar() {
@@ -907,53 +1541,55 @@ timerReloj.schedule(ttReloj, 1000, 1000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
 
-                    for (int i = 0; i < model.getRowCount(); i++) {
-                        terminadas = terminadas + terminada[i];
-                    }
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    terminadas = terminadas + terminada[i];
+                }
 
-                    for (int i = 0; i < procesando.length; i++) {
-                        procesada = procesada + procesando[i];
-
-                    }
-                    terminadaCheck = terminadas;
-
-                    procesandoLabel.setText("Procesando: " + procesada);
-                    terminadasLabel.setText("Terminadas: " + terminadaCheck);
-
-                    esperaLabel.setText("En Espera: " + (model.getRowCount() - terminadas));
-
-                    if (terminadaCheck >= model.getRowCount() || nextRollArray[0].equals(LocalDateTime.now())) {
-                        System.out.println("Terminado" + terminadaCheck);
-                        terminadaCheck = 0;
-                        esperaLabel.setText("En Espera: " + model.getRowCount());
-
-                        for (int i = 0; i < model.getRowCount(); i++) {
-                            terminada[i] = 0;
-                        }
-                    }
-                    terminadas = 0;
-
-                    if (procesada == 0 && !openPopUp) {
-                        if (terminadaCheck == 0) {
-                            reOrder();
-                        }
-                        if (clean) {
-                            try {
-                                Runtime.getRuntime().exec("taskkill /F /IM geckodriver.exe");
-                                Runtime.getRuntime().exec("taskkill /F /IM firefox.exe");
-                                Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
-
-                            } catch (IOException ex) {
-                                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            clean = false;
-                        }
-                    }
-                    procesada = 0;
+                for (int i = 0; i < procesando.length; i++) {
+                    procesada = procesada + procesando[i];
 
                 }
+                terminadaCheck = terminadas;
+
+                procesandoLabel.setText("Procesando: " + procesada);
+                terminadasLabel.setText("Terminadas: " + terminadaCheck);
+
+                esperaLabel.setText("En Espera: " + (model.getRowCount() - terminadas));
+                minHora = nextRollArray[0];
+                if (terminadaCheck >= model.getRowCount() || LocalDateTime.now().isAfter(minHora.minusMinutes(3))) {
+                    terminadaCheck = 0;
+                    esperaLabel.setText("En Espera: " + model.getRowCount());
+
+                    for (int i = 0; i < model.getRowCount(); i++) {
+                        terminada[i] = 0;
+                    }
+                }
+                terminadas = 0;
+
+                if (procesada == 0 && !openPopUp) {
+                    if (terminadaCheck == 0) {
+                        reOrder();
+                    }
+
+                    for (int i = 1; i < nextRollArray.length; i++) {
+                        if (nextRollArray[i].isBefore(minHora)) {
+                            minHora = nextRollArray[i];
+                        }
+                    }
+                    if (clean) {
+                        try {
+                            Runtime.getRuntime().exec("taskkill /F /IM geckodriver.exe");
+                            Runtime.getRuntime().exec("taskkill /F /IM firefox.exe");
+                            Runtime.getRuntime().exec("cmd.exe /c start C:\\\"Program Files\\GT Tools\\Temp.bat\"");
+
+                        } catch (IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        clean = false;
+                    }
+                }
+                procesada = 0;
             }
         ;
         }
@@ -971,6 +1607,8 @@ timerReloj.schedule(ttReloj, 1000, 1000);
         TableColumn col0 = col.getColumn(0);
         col0.setHeaderValue(iconLabel0);
         col0.setHeaderRenderer(renderer);
+
+        TableColumn col1 = col.getColumn(1);
 
         ficheroPerfil2 = new File("C:\\Users\\" + System.getProperty("user.name")
                 + "\\AppData\\Roaming\\Mozilla\\Firefox\\profiles.ini");
@@ -999,7 +1637,7 @@ timerReloj.schedule(ttReloj, 1000, 1000);
             int perfilNumber = 1;
             for (int j = 0; j < perfiles.size(); j++) {
                 String perfil = perfiles.get(j);
-                Object[] rowData = {(int) perfilNumber, perfil, "", "", "", (int) 0, (int) 0, true, "", "", true, "", "", "", ""};
+                Object[] rowData = {(int) perfilNumber, perfil, "38g3Qrcr4vCR49uTL1VAa1Cf1u4zfaL2Vf", "", "", (int) 0, (int) 0, true, "", "", true, "", "", "", ""};
                 model.addRow(rowData);
                 perfilNumber++;
             }
@@ -1015,7 +1653,11 @@ timerReloj.schedule(ttReloj, 1000, 1000);
     }
 
     private void loadArrays() {
+        pause = new boolean[13];
+        for (int i = 0; i < pause.length; i++) {
+            pause[i] = true;
 
+        }
         nextRollArray = new LocalDateTime[model.getRowCount() + 1];
         balanceTotal = new int[model.getRowCount()];
         terminada = new int[model.getRowCount()];
@@ -1094,26 +1736,92 @@ timerReloj.schedule(ttReloj, 1000, 420000);
     }
 
     private void properties() {
-
         totalPerfilesLabel.setText("Total: " + model.getRowCount());
         esperaLabel.setText("En Espera: " + model.getRowCount());
         procesandoLabel.setText("Procesando: " + procesada);
+        jTextField2.setVisible(false);
+        residualTextFiel.setVisible(false);
 
         try {
+            proxyUser.setText(PROP.getProperty("proxyUser"));
+            proxyPass.setText(PROP.getProperty("proxyPass"));
+
             PROP.load(new FileReader(PROP_PATH));
             checkBonusRP = Boolean.valueOf(PROP.getProperty("bonoRpelectStatus"));
+            bonusRP.setSelected(true);
             checkBonusBTC = Boolean.valueOf(PROP.getProperty("bonoBtcSelectStatus"));
+            bonoBTC.setSelected(checkBonusBTC);
             backGroundStatus = Boolean.valueOf(PROP.getProperty("backGroundSelectSatatus"));
+            backgroundStatus.setSelected(backGroundStatus);
             workerStatus = Integer.parseInt(PROP.getProperty("activeWorkers"));
+            activeWorkers.setSelectedItem(String.valueOf(workerStatus));
+            sendProxy.setSelected(Boolean.valueOf(PROP.getProperty("sendProxy")));
             boolean advanced = Boolean.valueOf(PROP.getProperty("advancedMode"));
+            modoAvanzado.setSelected(advanced);
+            captchaKey1.setText(PROP.getProperty("TwoCaptchaKey"));
             tipoBono[0] = Integer.parseInt(PROP.getProperty("limiteBonoRP"));
+            limiteRP.setSelectedIndex(tipoBono[0]);
             tipoBono[1] = Integer.parseInt(PROP.getProperty("limiteBonoBtC"));
+            limiteBTC.setSelectedIndex(tipoBono[1]);
             this.setAlwaysOnTop(Boolean.valueOf(PROP.getProperty("alwaysTop")));
-            System.out.println(workerStatus);
+            AlwaysOnTop.setSelected(Boolean.valueOf(PROP.getProperty("alwaysTop")));
+            monsterIP.setText(PROP.getProperty("capMonsterIP"));
+
+            activePause.setSelected(Boolean.parseBoolean(PROP.getProperty("activarPausa")));
+            if (PROP.getProperty("stopDuring").equals("10 Minutos")) {
+                stopDuring = 10 * 60000;
+            } else if (PROP.getProperty("stopDuring").equals("20 Minutos")) {
+                stopDuring = 20 * 60000;
+            } else if (PROP.getProperty("stopDuring").equals("30 Minutos")) {
+                stopDuring = 30 * 60000;
+            } else if (PROP.getProperty("stopDuring").equals("40 Minutos")) {
+                stopDuring = 40 * 60000;
+            } else if (PROP.getProperty("stopDuring").equals("50 Minutos")) {
+                stopDuring = 50 * 60000;
+            } else if (PROP.getProperty("stopDuring").equals("60 Minutos")) {
+                stopDuring = 60 * 60000;
+            }
+
+            detenerDurante.setSelectedItem(PROP.getProperty("stopDuring"));
+
+            tipoBono[2] = Integer.parseInt(PROP.getProperty("montoTicket"));
+            ticketMonto.setValue(tipoBono[2]);
+
+            if (PROP.getProperty("buyTicket").equals("1 Dia")) {
+                buyTicket = LocalDateTime.now().plusHours(24);
+            } else if (PROP.getProperty("buyTicket").equals("2 Dias")) {
+                buyTicket = LocalDateTime.now().plusHours(48);
+            } else if (PROP.getProperty("buyTicket").equals("3 Dias")) {
+                buyTicket = LocalDateTime.now().plusHours(72);
+            } else if (PROP.getProperty("buyTicket").equals("7 Dias")) {
+                buyTicket = LocalDateTime.now().plusHours(168);
+            }
+
+            for (int i = 0; i < model.getRowCount(); i++) {
+                model.setValueAt(false, i, 15);
+            }
+
+            String horaPausa = PROP.getProperty("nextStop");
+            nextPause.setSelectedItem(horaPausa);
+            switch (horaPausa) {
+                case "3 Horas":
+                    nextStop = 3;
+                    break;
+                case "6 Horas":
+                    nextStop = 6;
+                    break;
+                case "12 Horas":
+                    nextStop = 12;
+                    break;
+                case "24 Horas":
+                    nextStop = 24;
+                    break;
+                default:
+                    break;
+            }
             for (int i = 0; i < model.getRowCount(); i++) {
                 model.setValueAt(checkBonusRP, i, 7);
                 model.setValueAt(checkBonusBTC, i, 10);
-
             }
 
             if (!advanced) {
@@ -1132,33 +1840,7 @@ timerReloj.schedule(ttReloj, 1000, 420000);
                 jTable1.getColumn(4).setWidth(50);
                 jTable1.getColumn(4).setMaxWidth(50);
             }
-
-            switch (workerStatus) {
-                case 1:
-                    jLabel2.setText("1");
-                    break;
-                case 2:
-                    jLabel2.setText("2");
-                    break;
-                case 3:
-                    jLabel2.setText("3");
-                    break;
-                case 4:
-                    jLabel2.setText("4");
-                    break;
-                case 5:
-                    jLabel2.setText("5");
-                    break;
-                case 6:
-                    jLabel2.setText("6");
-                    break;
-                case 7:
-                    jLabel2.setText("7");
-                    break;
-                case 8:
-                    jLabel2.setText("8");
-                    break;
-            }
+            jLabel2.setText(String.valueOf(workerStatus));
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainFrame.class
@@ -1167,6 +1849,36 @@ timerReloj.schedule(ttReloj, 1000, 420000);
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class
                     .getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void saveProperties() {
+        PROP.setProperty("activeWorkers", activeWorkers.getSelectedItem().toString());
+        PROP.setProperty("proxyUser", proxyUser.getText());
+        PROP.setProperty("backGroundSelectSatatus", String.valueOf(backgroundStatus.isSelected()));
+        PROP.setProperty("bonoBtcSelectStatus", String.valueOf(bonoBTC.isSelected()));
+        PROP.setProperty("proxyPass", proxyPass.getText());
+        PROP.setProperty("bonoRpelectStatus", String.valueOf(bonusRP.isSelected()));
+        PROP.setProperty("TwoCaptchaKey", captchaKey1.getText());
+        PROP.setProperty("capMonsterIP", monsterIP.getText());
+        PROP.setProperty("alwaysTop", String.valueOf(AlwaysOnTop.isSelected()));
+        PROP.setProperty("advancedMode", String.valueOf(modoAvanzado.isSelected()));
+        PROP.setProperty("limiteBonoRP", String.valueOf(limiteRP.getSelectedIndex()));
+        PROP.setProperty("limiteBonoBtC", String.valueOf(limiteBTC.getSelectedIndex()));
+        PROP.setProperty("sendProxy", String.valueOf(sendProxy.isSelected()));
+        PROP.setProperty("nextStop", nextPause.getSelectedItem().toString());
+        PROP.setProperty("stopDuring", detenerDurante.getSelectedItem().toString());
+        PROP.setProperty("montoTicket", String.valueOf(ticketMonto.getValue()));
+        PROP.setProperty("buyTicket", ticketDia.getSelectedItem().toString());
+        PROP.setProperty("activarPausa", String.valueOf(activePause.isSelected()));
+
+        porcentajeRetirar = jTextField2.getText();
+        montoResidual = residualTextFiel.getText();
+
+        try {
+            PROP.store(new FileWriter(PROP_PATH), "CoinBot");
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1189,7 +1901,7 @@ timerReloj.schedule(ttReloj, 1000, 420000);
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ConfigFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
 
@@ -1198,7 +1910,7 @@ timerReloj.schedule(ttReloj, 1000, 420000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[0]) {
 
                     for (int x = 0; x < model.getRowCount(); x++) {
                         if (nextRollArray[x].isBefore(nextRollArray[x + 1])
@@ -1227,13 +1939,9 @@ timerReloj.schedule(ttReloj, 1000, 420000);
                     if (semaforoWorker1) {
                         try {
                             semaforoWorker1 = false;
-                            String perfil = (String) jTable1.getValueAt(w1, 1);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w1, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w1, 10);
                             nextRollArray[w1] = LocalDateTime.now().plusMinutes(15);
-                            worker = new Worker(perfil, w1, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
-
+                            worker = new Worker(w1, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             worker.execute();
                             Rectangle cellRect = jTable1.getCellRect(w1, 1, true);
                             jTable1.scrollRectToVisible(cellRect);
@@ -1262,7 +1970,7 @@ timerReloj.schedule(ttReloj, 1000, 420000);
         TimerTask ttWorker2 = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[1]) {
                     for (int c = 0; c < model.getRowCount(); c++) {
                         if (nextRollArray[c].isBefore(nextRollArray[c + 1])
                                 || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
@@ -1290,12 +1998,9 @@ timerReloj.schedule(ttReloj, 1000, 420000);
                         try {
 
                             semaforoWorker2 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w2, 1);
                             nextRollArray[w2] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w2, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w2, 10);
-                            worker2 = new Worker2(perfil2, w2, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker2 = new Worker2(w2, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             Rectangle cellRect = jTable1.getCellRect(w2, 1, true);
                             jTable1.scrollRectToVisible(cellRect);
                             worker2.execute();
@@ -1323,7 +2028,7 @@ timerReloj.schedule(ttReloj, 1000, 420000);
         TimerTask ttWorker3 = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[2]) {
                     for (int q = 0; q < model.getRowCount(); q++) {
                         if (nextRollArray[q].isBefore(nextRollArray[q + 1])
                                 || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
@@ -1350,12 +2055,9 @@ timerReloj.schedule(ttReloj, 1000, 420000);
                         try {
 
                             semaforoWorker3 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w3, 1);
                             nextRollArray[w3] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w3, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w3, 10);
-                            worker3 = new Worker3(perfil2, w3, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker3 = new Worker3(w3, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             Rectangle cellRect = jTable1.getCellRect(w3, 1, true);
                             jTable1.scrollRectToVisible(cellRect);
                             worker3.execute();
@@ -1382,7 +2084,7 @@ timerTaskWorker3.schedule(ttWorker3, 2000, 1000);
         TimerTask ttWorker4 = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[3]) {
                     for (int q = 0; q < model.getRowCount(); q++) {
                         if (nextRollArray[q].isBefore(nextRollArray[q + 1])
                                 || nextRollArray[q].isEqual(nextRollArray[q + 1])) {
@@ -1409,12 +2111,9 @@ timerTaskWorker3.schedule(ttWorker3, 2000, 1000);
                     if (semaforoWorker4) {
                         try {
                             semaforoWorker4 = false;
-                            String perfil4 = (String) jTable1.getValueAt(w4, 1);
                             nextRollArray[w4] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w4, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w4, 10);
-                            worker4 = new Worker4(perfil4, w4, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker4 = new Worker4(w4, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             Rectangle cellRect = jTable1.getCellRect(w4, 1, true);
                             jTable1.scrollRectToVisible(cellRect);
                             worker4.execute();
@@ -1441,7 +2140,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask ttWorker5 = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[4]) {
                     for (int c = 0; c < model.getRowCount(); c++) {
                         if (nextRollArray[c].isBefore(nextRollArray[c + 1])
                                 || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
@@ -1469,12 +2168,9 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                         try {
 
                             semaforoWorker5 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w5, 1);
                             nextRollArray[w5] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w5, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w5, 10);
-                            worker5 = new Worker5(perfil2, w5, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker5 = new Worker5(w5, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             worker5.execute();
 
                             semaforoWorker5 = worker5.get();
@@ -1500,7 +2196,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask ttWorker6 = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[5]) {
                     for (int c = 0; c < model.getRowCount(); c++) {
                         if (nextRollArray[c].isBefore(nextRollArray[c + 1])
                                 || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
@@ -1527,14 +2223,10 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoWorker6) {
                         try {
                             semaforoWorker6 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w6, 1);
                             nextRollArray[w6] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w6, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w6, 10);
-                            worker6 = new Worker6(perfil2, w6, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker6 = new Worker6(w6, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             worker6.execute();
-
                             semaforoWorker6 = worker6.get();
 
                             if (nextRollArray[w6].isAfter(LocalDateTime.now().plusMinutes(5))) {
@@ -1558,7 +2250,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask ttWorker7 = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[6]) {
                     for (int c = 0; c < model.getRowCount(); c++) {
                         if (nextRollArray[c].isBefore(nextRollArray[c + 1])
                                 || nextRollArray[c].isEqual(nextRollArray[c + 1])) {
@@ -1585,12 +2277,9 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoWorker7) {
                         try {
                             semaforoWorker7 = false;
-                            String perfil2 = (String) jTable1.getValueAt(w7, 1);
                             nextRollArray[w7] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w7, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w7, 10);
-                            worker7 = new Worker7(perfil2, w7, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker7 = new Worker7(w7, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             worker7.execute();
                             semaforoWorker7 = worker7.get();
 
@@ -1615,7 +2304,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[7]) {
                     for (int x = 0; x < model.getRowCount(); x++) {
                         if (nextRollArray[x].isBefore(nextRollArray[x + 1])
                                 || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
@@ -1643,12 +2332,9 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoWorker8) {
                         try {
                             semaforoWorker8 = false;
-                            String perfil = (String) jTable1.getValueAt(w8, 1);
                             nextRollArray[w8] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w8, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w8, 10);
-                            worker8 = new Worker8(perfil, w8, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker8 = new Worker8(w8, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             worker8.execute();
                             semaforoWorker8 = worker8.get();
                             if (nextRollArray[w8].isAfter(LocalDateTime.now().plusMinutes(5))) {
@@ -1674,7 +2360,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[8]) {
                     for (int x = 0; x < model.getRowCount(); x++) {
                         if (nextRollArray[x].isBefore(nextRollArray[x + 1])
                                 || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
@@ -1702,17 +2388,16 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoWorker9) {
                         try {
                             semaforoWorker9 = false;
-                            String perfil = (String) jTable1.getValueAt(w9, 1);
                             nextRollArray[w9] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w9, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w9, 10);
-                            worker9 = new Worker9(perfil, w9, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker9 = new Worker9(w9, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             semaforoWorker9 = worker9.run();
                             if (nextRollArray[w9].isAfter(LocalDateTime.now().plusMinutes(5))) {
                                 terminada[w9] = 1;
                             }
                         } catch (IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -1731,7 +2416,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[9]) {
                     for (int x = 0; x < model.getRowCount(); x++) {
                         if (nextRollArray[x].isBefore(nextRollArray[x + 1])
                                 || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
@@ -1759,17 +2444,16 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoWorker10) {
                         try {
                             semaforoWorker10 = false;
-                            String perfil = (String) jTable1.getValueAt(w10, 1);
                             nextRollArray[w10] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w10, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w10, 10);
-                            worker10 = new Worker10(perfil, w10, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker10 = new Worker10(w10, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             semaforoWorker10 = worker10.run();
                             if (nextRollArray[w10].isAfter(LocalDateTime.now().plusMinutes(5))) {
                                 terminada[w10] = 1;
                             }
                         } catch (IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -1788,7 +2472,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[10]) {
                     for (int x = 0; x < model.getRowCount(); x++) {
                         if (nextRollArray[x].isBefore(nextRollArray[x + 1])
                                 || nextRollArray[x].isEqual(nextRollArray[x + 1])) {
@@ -1816,17 +2500,16 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoWorker11) {
                         try {
                             semaforoWorker11 = false;
-                            String perfil = (String) jTable1.getValueAt(w11, 1);
                             nextRollArray[w11] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(w11, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(w11, 10);
-                            worker11 = new Worker11(perfil, w11, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            worker11 = new Worker11(w11, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             semaforoWorker11 = worker11.run();
                             if (nextRollArray[w11].isAfter(LocalDateTime.now().plusMinutes(5))) {
                                 terminada[w11] = 1;
                             }
                         } catch (IOException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -1845,7 +2528,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[11]) {
                     for (int x = 0; x < model.getRowCount(); x++) {
 
                         String estado = (String) jTable1.getValueAt(x, 14);
@@ -1863,12 +2546,9 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoSilentWorker) {
                         try {
                             semaforoSilentWorker = false;
-                            String perfil = (String) jTable1.getValueAt(silentSelector, 1);
                             nextRollArray[silentSelector] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(silentSelector, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(silentSelector, 10);
-                            silent = new SilentWorker(perfil, silentSelector, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            silent = new SilentWorker(silentSelector, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             silent.execute();
                             semaforoSilentWorker = silent.get();
                             if (nextRollArray[silentSelector].isAfter(LocalDateTime.now().plusMinutes(5))) {
@@ -1894,7 +2574,7 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                if (pause) {
+                if (pause[12]) {
                     for (int x = 0; x < model.getRowCount(); x++) {
 
                         String estado = (String) jTable1.getValueAt(x, 14);
@@ -1912,12 +2592,9 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
                     if (semaforoSilentWorker2) {
                         try {
                             semaforoSilentWorker2 = false;
-                            String perfil = (String) jTable1.getValueAt(silentSelector2, 1);
                             nextRollArray[silentSelector2] = LocalDateTime.now().plusMinutes(15);
-                            checkBonusRP = (Boolean) jTable1.getValueAt(silentSelector2, 7);
-                            checkBonusBTC = (Boolean) jTable1.getValueAt(silentSelector2, 10);
-                            silent2 = new SilentWorker2(perfil, silentSelector2, model, backGroundStatus, nextRollArray,
-                                    balanceRoll, balanceTotal, checkBonusRP, checkBonusBTC, proxies, procesando, tipoBono);
+                            silent2 = new SilentWorker2(silentSelector2, model, backGroundStatus, nextRollArray,
+                                    balanceRoll, balanceTotal, proxies, procesando, tipoBono, ticketCount);
                             silent2.execute();
                             semaforoSilentWorker2 = silent2.get();
                             if (nextRollArray[silentSelector2].isAfter(LocalDateTime.now().plusMinutes(5))) {
@@ -2123,8 +2800,80 @@ timerTaskWorker4.schedule(ttWorker4, 2500, 1000);
             model.setValueAt(bonoBTC[i], i, 11);
             model.setValueAt(bonoBTCFin[i], i, 12);
             model.setValueAt(proxRoll[i], i, 13);
-            model.setValueAt(status[i], i, 14);
+            model.setValueAt(" Esperando siguiente ronda", i, 14);
 
         }
+    }
+
+    private void tablaRetiros() {
+
+        TableColumnModel col = jTable1.getColumnModel();
+        col.getColumn(2).setHeaderValue("Wallet");
+        col.getColumn(3).setHeaderValue("Balance");
+        col.getColumn(5).setHeaderValue("<html>Cantidad<br>Retirada</html>");
+        col.getColumn(8).setHeaderValue("<html>Balance<br>Disponible<html>");
+        col.getColumn(9).setHeaderValue("Estado"); 
+
+        jTable1.getColumn(0).setPreferredWidth(30);
+        jTable1.getColumn(0).setWidth(30);
+        jTable1.getColumn(0).setMaxWidth(30);
+        jTable1.getColumn(1).setPreferredWidth(150);
+        jTable1.getColumn(1).setWidth(150);
+        jTable1.getColumn(1).setMaxWidth(300);
+        jTable1.getColumn(2).setPreferredWidth(250);
+        jTable1.getColumn(2).setWidth(250);
+        jTable1.getColumn(2).setMaxWidth(350);
+        //Columna de balance
+        jTable1.getColumn(3).setPreferredWidth(80);
+        jTable1.getColumn(3).setWidth(80);
+        jTable1.getColumn(3).setMaxWidth(170);
+        jTable1.getColumn(5).setPreferredWidth(80);
+        jTable1.getColumn(5).setWidth(80);
+        jTable1.getColumn(5).setMaxWidth(120);
+        jTable1.getColumn(5).setMinWidth(80);
+        jTable1.getColumn(8).setPreferredWidth(80);
+        jTable1.getColumn(8).setWidth(80);
+        jTable1.getColumn(8).setMaxWidth(170);
+
+        //Estas lineas ocultan el resto de las columnas en la tabla
+        jTable1.getColumn(4).setPreferredWidth(0);
+        jTable1.getColumn(4).setMinWidth(0);
+        jTable1.getColumn(4).setWidth(0);
+        jTable1.getColumn(4).setMaxWidth(0);
+        jTable1.getColumn(6).setPreferredWidth(0);
+        jTable1.getColumn(6).setMinWidth(0);
+        jTable1.getColumn(6).setWidth(0);
+        jTable1.getColumn(6).setMaxWidth(0);
+        jTable1.getColumn(7).setPreferredWidth(0);
+        jTable1.getColumn(7).setMinWidth(0);
+        jTable1.getColumn(7).setWidth(0);
+        jTable1.getColumn(7).setMaxWidth(0);
+        jTable1.getColumn(10).setPreferredWidth(0);
+        jTable1.getColumn(10).setMinWidth(0);
+        jTable1.getColumn(10).setWidth(0);
+        jTable1.getColumn(10).setMaxWidth(0);
+        jTable1.getColumn(11).setPreferredWidth(0);
+        jTable1.getColumn(11).setMinWidth(0);
+        jTable1.getColumn(11).setWidth(0);
+        jTable1.getColumn(11).setMaxWidth(0);
+
+        jTable1.getColumn(12).setPreferredWidth(0);
+        jTable1.getColumn(12).setMinWidth(0);
+        jTable1.getColumn(12).setWidth(0);
+        jTable1.getColumn(12).setMaxWidth(0);
+
+        jTable1.getColumn(13).setPreferredWidth(0);
+        jTable1.getColumn(13).setMinWidth(0);
+        jTable1.getColumn(13).setWidth(0);
+        jTable1.getColumn(13).setMaxWidth(0);
+
+        jTable1.getColumn(14).setPreferredWidth(0);
+        jTable1.getColumn(14).setMinWidth(0);
+        jTable1.getColumn(14).setWidth(0);
+        jTable1.getColumn(14).setMaxWidth(0);
+    }
+    
+    private void retiros(){
+       
     }
 }
