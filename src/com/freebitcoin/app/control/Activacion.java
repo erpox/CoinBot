@@ -1,115 +1,115 @@
+// 
+// Decompiled by Procyon v0.5.30
+// 
+
 package com.freebitcoin.app.control;
 
 import com.freebitcoin.app.vistas.LoginFrame;
+import java.util.NoSuchElementException;
 import java.io.IOException;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.NoSuchElementException;
+import java.util.Scanner;
 
-public class Activacion {
-
+public class Activacion
+{
     private static String cpuIDsN;
     private static String hddSN;
     private static String biosIDsN;
     private static String uddIDsN;
     private static String motherIDsN;
-
+    
     private void cpuID() {
-
         try {
-            Process processCpuID = Runtime.getRuntime().exec(new String[]{"wmic", "cpu", "get", "ProcessorId"});
+            final Process processCpuID = Runtime.getRuntime().exec(new String[] { "wmic", "cpu", "get", "ProcessorId" });
             processCpuID.getOutputStream().close();
-            Scanner sc = new Scanner(processCpuID.getInputStream());
+            final Scanner sc = new Scanner(processCpuID.getInputStream());
             sc.next();
-            cpuIDsN = sc.next();
-        } catch (IOException ex) {
-            Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
-        }catch (NoSuchElementException ex) {
-            cpuIDsN = "No hay CPU";
+            Activacion.cpuIDsN = sc.next();
         }
-        System.out.println(cpuIDsN);
+        catch (IOException ex) {
+            Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (NoSuchElementException ex2) {
+            Activacion.cpuIDsN = "No hay CPU";
+        }
     }
-
+    
     private void hardDiskDriveID() {
-
         try {
-            Process processHDD = Runtime.getRuntime().exec(new String[]{"wmic", "DISKDRIVE", "get", "SerialNumber"});
+            final Process processHDD = Runtime.getRuntime().exec(new String[] { "wmic", "DISKDRIVE", "get", "SerialNumber" });
             processHDD.getOutputStream().close();
-            Scanner sc = new Scanner(processHDD.getInputStream());
+            final Scanner sc = new Scanner(processHDD.getInputStream());
             sc.next();
-            hddSN = sc.next();
-        } catch (IOException ex) {
-            Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchElementException ex) {
-           hddSN = "No hay HDD";
+            Activacion.hddSN = sc.next();
         }
-        System.out.println(hddSN);
+        catch (IOException ex) {
+            Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (NoSuchElementException ex2) {
+            Activacion.hddSN = "No hay HDD";
+        }
     }
-
+    
     private void biosID() {
-
         try {
-            Process processBIOS = Runtime.getRuntime().exec(new String[]{"wmic", "bios", "get", "SerialNumber"});
+            final Process processBIOS = Runtime.getRuntime().exec(new String[] { "wmic", "bios", "get", "SerialNumber" });
             processBIOS.getOutputStream().close();
-            Scanner sc = new Scanner(processBIOS.getInputStream());
+            final Scanner sc = new Scanner(processBIOS.getInputStream());
             sc.next();
-            biosIDsN = sc.next();
-        } catch (NoSuchElementException ex) {
-            biosIDsN = "No hay serial BIOS";
-        } catch (IOException ex) {
+            Activacion.biosIDsN = sc.next();
+        }
+        catch (NoSuchElementException ex2) {
+            Activacion.biosIDsN = "No hay serial BIOS";
+        }
+        catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
         }
-         System.out.println(biosIDsN);
     }
-
+    
     private void uddID() {
-
         try {
-            Process processBIOS = Runtime.getRuntime().exec(new String[]{"wmic", "csproduct", "get", "UUID"});
+            final Process processBIOS = Runtime.getRuntime().exec(new String[] { "wmic", "csproduct", "get", "UUID" });
             processBIOS.getOutputStream().close();
-            Scanner sc = new Scanner(processBIOS.getInputStream());
+            final Scanner sc = new Scanner(processBIOS.getInputStream());
             sc.next();
-            uddIDsN = sc.next();
-
-        } catch (IOException ex) {
-            Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
-        }catch (NoSuchElementException ex) {
-            uddIDsN = "No hay UUID";
+            Activacion.uddIDsN = sc.next();
         }
-        System.out.println(uddIDsN);
-
+        catch (IOException ex) {
+            Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (NoSuchElementException ex2) {
+            Activacion.uddIDsN = "No hay UUID";
+        }
     }
-
+    
     private void motherID() {
         try {
-            Process processMotherID = Runtime.getRuntime().exec(new String[]{"wmic", "baseboard", "get", "SerialNumber"});
+            final Process processMotherID = Runtime.getRuntime().exec(new String[] { "wmic", "baseboard", "get", "SerialNumber" });
             processMotherID.getOutputStream().close();
-            Scanner sc = new Scanner(processMotherID.getInputStream());
+            final Scanner sc = new Scanner(processMotherID.getInputStream());
             try {
                 sc.next();
-                motherIDsN = sc.next();
-
-            } catch (NoSuchElementException ex) {
-                motherIDsN = "No hay serial MB";
-
+                Activacion.motherIDsN = sc.next();
             }
-        } catch (IOException ex) {
+            catch (NoSuchElementException ex2) {
+                Activacion.motherIDsN = "No hay serial MB";
+            }
+        }
+        catch (IOException ex) {
             Logger.getLogger(Activacion.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println(motherIDsN);
     }
-
-//    public static void main(String[] args) throws IOException, InterruptedException {
-//        Activacion acti = new Activacion();
-//        acti.cpuID();
-//        acti.hardDiskDriveID();
-//        acti.biosID();
-//        acti.uddID();
-//        acti.motherID();
-//        String[] systemInfo = {cpuIDsN, hddSN, biosIDsN, uddIDsN, motherIDsN};
-//
-//        Thread.sleep(8000);
-//        new LoginFrame(systemInfo).setVisible(true);
-//    }
+    
+    public static void main(final String[] args) throws IOException, InterruptedException {
+        final Activacion acti = new Activacion();
+        acti.cpuID();
+        acti.hardDiskDriveID();
+        acti.biosID();
+        acti.uddID();
+        acti.motherID();
+        final String[] systemInfo = { Activacion.cpuIDsN, Activacion.hddSN, Activacion.biosIDsN, Activacion.uddIDsN, Activacion.motherIDsN };
+        Thread.sleep(8000L);
+        new LoginFrame(systemInfo).setVisible(true);
+    }
 }

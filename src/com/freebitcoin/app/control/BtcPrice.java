@@ -1,94 +1,92 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+// 
+// Decompiled by Procyon v0.5.30
+// 
+
 package com.freebitcoin.app.control;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.net.URL;
+import java.net.HttpURLConnection;
 
-/**
- *
- * @author Eduardo
- */
-public class BtcPrice {
-
+public class BtcPrice
+{
     String retornaPrecio;
-     HttpURLConnection huc;
+    HttpURLConnection huc;
+    
     public BtcPrice() {
-        Connection();
+        this.Connection();
     }
-
+    
     private void Connection() {
         try {
-            URL url = new URL("https://api.coinmarketcap.com/v1/ticker/bitcoin/"); //The URL
-            HttpURLConnection huc = connect(url); //Connects to the website
-            huc.connect(); //Opens the connection
-            String str = readBody(huc); //Reads the response
-            huc.disconnect(); //Closes
-        } catch (UnknownHostException e) {
+            final URL url = new URL("https://api.coinmarketcap.com/v1/ticker/bitcoin/");
+            final HttpURLConnection huc = this.connect(url);
+            huc.connect();
+            final String str = this.readBody(huc);
+            huc.disconnect();
+        }
+        catch (UnknownHostException e) {
             Logger.getLogger(BtcPrice.class.getName()).log(Level.SEVERE, null, e);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(BtcPrice.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
+        }
+        catch (MalformedURLException ex) {
             Logger.getLogger(BtcPrice.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        catch (Exception ex2) {
+            Logger.getLogger(BtcPrice.class.getName()).log(Level.SEVERE, null, ex2);
+        }
     }
-
-    private String readBody(HttpURLConnection huc) {
+    
+    private String readBody(final HttpURLConnection huc) {
         try {
-            InputStream is = huc.getInputStream(); //Inputstream
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is)); //BufferedReader
+            final InputStream is = huc.getInputStream();
+            final BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            final StringBuilder response = new StringBuilder();
             String line;
-            StringBuilder response = new StringBuilder();
             while ((line = rd.readLine()) != null) {
-                response.append(line); //Append the line
-                response.append('\n'); //and a new line
-
+                response.append(line);
+                response.append('\n');
             }
             rd.close();
-            retornaPrecio = response.substring(132, 138);
-
+            this.retornaPrecio = response.substring(132, 138);
             if (response.substring(132, 138).endsWith(".")) {
-                retornaPrecio = response.substring(132, 138).concat("0");
+                this.retornaPrecio = response.substring(132, 138).concat("0");
             }
-            return retornaPrecio;
-        } catch (IOException ex) {
+            return this.retornaPrecio;
+        }
+        catch (IOException ex) {
             Logger.getLogger(BtcPrice.class.getName()).log(Level.SEVERE, null, ex);
-            return retornaPrecio = "      ";
+            return this.retornaPrecio = "      ";
         }
     }
-
-    private HttpURLConnection connect(URL url) //Connect to the URL
-    {
-        try //Connect to the URL
-        {
-            huc = (HttpURLConnection) url.openConnection(); //Opens connection to the website
-            huc.setReadTimeout(15000); //Read timeout - 15 seconds
-            huc.setConnectTimeout(15000); //Connecting timeout - 15 seconds
-            huc.setUseCaches(false); //Don't use cache
-            HttpURLConnection.setFollowRedirects(true); //Follow redirects if there are any
-            huc.addRequestProperty("Host", "api.coinmarketcap.com"); //www.fetagracollege.org is the host
-            huc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36"); //Chrome user agent
-            return huc;
-        } catch (IOException ex) {
+    
+    private HttpURLConnection connect(final URL url) {
+        try {
+            (this.huc = (HttpURLConnection)url.openConnection()).setReadTimeout(15000);
+            this.huc.setConnectTimeout(15000);
+            this.huc.setUseCaches(false);
+            HttpURLConnection.setFollowRedirects(true);
+            this.huc.addRequestProperty("Host", "api.coinmarketcap.com");
+            this.huc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36");
+            return this.huc;
+        }
+        catch (IOException ex) {
             Logger.getLogger(BtcPrice.class.getName()).log(Level.SEVERE, null, ex);
-            return huc;
+            return this.huc;
         }
     }
-
+    
     public String getRetornaPrecio() {
-        return retornaPrecio;
+        return this.retornaPrecio;
     }
-
 }
